@@ -33,7 +33,7 @@ ifeq ($(UNAME), Darwin)
 endif
 
 .PHONY: all
-all:
+all: $(swig)
 	$(CC) -c $(CFLAGS) $(JAVA_INCLUDE) $(SRCS)
 	$(CC) $(LDFLAGS) -o $(TARGET) $(LIBS) $(OBJS)
 	javac *.java
