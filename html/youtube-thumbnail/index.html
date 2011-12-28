@@ -20,92 +20,100 @@
 	<script src="lib/jquery.youtubeplaylist.js"></script>
 	<script src="http://swfobject.googlecode.com/svn/trunk/swfobject/swfobject.js"></script>
 	<script>  
-    $(function () {  
-      $('ul#navInner > li').click(function (e) {  
-        if (e.target == $(this).children()[0]) {  
-          if ($(this).hasClass('clicked')) {  
-            $(this).removeClass('clicked');  
-          }  
-          else {  
-            $('li.clicked').removeClass('clicked');  
-            $(this).addClass('clicked');  
-          }  
-        }  
-        return false;  
-      });  
-    });      
-	</script>
-	<script>
-	$(function () {  
-  
-      var page = 1;
-      var pageSize = 20;  
-  
-	  $(document).ready(function() {
-		  $('#mycarousel').jcarousel({
-			  visible: 8,
-			  scroll: 1
-		  });
-	  });
-	  function add_item_to_curousel(i, item) {
-	  	var carousel = $('#mycarousel').data('jcarousel');
-		carousel.add(i, item);
-		console.log(i + " " + item);
-	  }
-      $('#btnSearch').click(function () {  
-        var query = $('#txtQuery').val();  
-        var time = 'all_time';  
-        var url = 'http://gdata.youtube.com/feeds/api/videos?start-index={page}&max-results={pageSize}&callback=?';  
-		var url2 = url.replace('{page}', page).replace('{pageSize}', pageSize);  
-		if (!query)
-			return;
+		$(function () {  
 
-        var params = {  
-          v: '2',  
-          q: query,
-          alt: 'json-in-script',  // atom, rss, json, json-in-script(jsonp)  
-          format: '5'             // 1-mobile, 5-swf, 6-mobile rtsp  
-        }  
-        $.getJSON(url2, params, function (data) {  
-          var feed = data.feed;  
-          var entries = feed.entry || [];  
-          $.each(data.feed.entry, function (i, item) {  
-            var vid = item.media$group.yt$videoid.$t;  
-            var title = item.title.$t;  
-            var url = item.content.src;  
-            var thumbnailUrl = item.media$group.media$thumbnail[0].url;  
-			var playerUrl = item.media$group.media$content[0].url;
-			console.log("getJson" + i + ", " + thumbnailUrl);
-			add_item_to_curousel(i, '<a href="javascript:loadVideo(\'' + playerUrl + '\' + true)" title="' + title  + 
-				'"><img src="' + thumbnailUrl + '" /></a>');
-          });  
-          var html = ['<ul>'];  
-          html.push('</ul>');  
-          $('#videos').html(html.join(''));  
-          if (entries.length > 0) {  
-            loadVideo(entries[0].media$group.media$content[0].url, false);  
-            $('#playerContainer').show();  
-          }  
-        });        
-	  });
-	  
-	  $('#txtQuery').keydown(function(e) { 
-		  if (e.keyCode == 13) {
-			var query = $('#txtQuery').val();
-			if (query)
-      	      $('#btnSearch').trigger('click');  
-		  }
-		console.log(e.keyCode);
-	  });
+			var page = 1;
+			var pageSize = 20;  
 
-    }); 
-  
-    function loadVideo(playerUrl, autoplay) {  
-      swfobject.embedSWF(  
-          playerUrl + '&rel=1&border=0&fs=1&autoplay=' + (autoplay ? 1 : 0),  
-          'player', '640', '505', '9.0.0', false, false, { allowfullscreen: 'true'}  // 290 x 250  
-        );  
-	} 
+			$(document).ready(function() {
+				$('#mycarousel').jcarousel({
+					visible: 8,
+					scroll: 1
+				});
+				$("#txtQuery").focus();
+			});
+			function add_item_to_curousel(i, item) {
+				var carousel = $('#mycarousel').data('jcarousel');
+				carousel.add(i, item);
+				console.log(i + " " + item);
+			}
+			$('#btnSearch').click(function () {  
+				var query = $('#txtQuery').val();  
+				var time = 'all_time';  
+				var url = 'http://gdata.youtube.com/feeds/api/videos?start-index={page}&max-results={pageSize}&callback=?';  
+				var url2 = url.replace('{page}', page).replace('{pageSize}', pageSize);  
+				if (!query)
+				return;
+
+				var params = {  
+					v: '2',  
+					q: query,
+					alt: 'json-in-script',  // atom, rss, json, json-in-script(jsonp)  
+					format: '5'             // 1-mobile, 5-swf, 6-mobile rtsp  
+				}  
+				$.getJSON(url2, params, function (data) {  
+					var feed = data.feed;  
+					var entries = feed.entry || [];  
+					$.each(data.feed.entry, function (i, item) {  
+						var vid = item.media$group.yt$videoid.$t;  
+						var title = item.title.$t;  
+						var url = item.content.src;  
+						var thumbnailUrl = item.media$group.media$thumbnail[0].url;  
+						var playerUrl = item.media$group.media$content[0].url;
+						console.log("getJson" + i + ", " + thumbnailUrl);
+						add_item_to_curousel(i, '<a href="javascript:loadVideo(\'' + playerUrl + '\' + true)" title="' + title  + 
+							'"><img src="' + thumbnailUrl + '" /></a>');
+					});  
+					var html = ['<ul>'];  
+						html.push('</ul>');  
+					$('#videos').html(html.join(''));  
+					if (entries.length > 0) {  
+						loadVideo(entries[0].media$group.media$content[0].url, false);  
+						$('#playerContainer').show();  
+					}  
+				});
+			});
+
+			$('#txtQuery').keydown(function(e) { 
+				if (e.keyCode == 13) {
+					var query = $('#txtQuery').val();
+					if (query)
+						$('#btnSearch').trigger('click');  
+				}
+				console.log(e.keyCode);
+			});
+
+		});
+
+		function playVideo() {
+		  	player = document.getElementById('player');
+			if (player) { player.playVideo(); }
+		}
+		function onytplayerStateChange(newState) {
+   			console.log("Player's new state: " + newState);
+		}
+		function onYouTubePlayerReady(playerId) {
+			if (playerId == 'player') {
+		  		player = document.getElementById('player');
+				player.addEventListener("onStateChange", "onytplayerStateChange");
+			}
+		}
+		
+		function setFocusOnFlash() {
+			player = swfobject.getObjectById('player');
+			if (player) {
+				player.tabIndex = 0;
+				player.focus();
+			}
+		}
+		function loadVideo(playerUrl, autoplay) {
+			console.log(playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autoplay=' + (autoplay ? 1 : 0));
+			swfobject.embedSWF(
+			playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autoplay=' + (autoplay ? 1 : 0),  
+			'player', '640', '505', '9.0.0', false, false, { allowfullscreen: 'true', allowScriptAccess: 'always'}  // 290 x 250  
+			);  
+//			setFocusOnFlash();
+		} 
 </script>
 <style type="text/css">
 body.home {
@@ -131,24 +139,15 @@ body.home {
 	    <div id="main"> 
 	      	<input id="txtQuery" type="text" value="" />      
 	      	<button id="btnSearch">Search!</button>    
-			<br>
-			<br>
 	      	<div id="videos"></div>  
   			<ul id="mycarousel" class="jcarousel-skin-komori">
   			  <!-- The content will be dynamically loaded in here -->
 		  	</ul>
-			<br>
 	    	<div id="playerContainer">  
 	    	  <object id="player"></object>  
 	    	</div>           
 		</div>
 	</div>
-	
-	<footer class="f1">
-		<img src="http://code.google.com/apis/youtube/images/logo.gif" alt="youtube"/> 
-		<p>Copyright 2011</p>
-	</footer><!-- .f1 -->
-
 </body>
 </html>
 
