@@ -4,8 +4,8 @@ WebSocket broadcast echo server
 Requirements
 ------------
 
-* [node]: http://nodejs.org/
-* [npm]: http://npmjs.org/
+* [node](http://nodejs.org/)
+* [npm](http://npmjs.org/)
 
 Usage
 -----
