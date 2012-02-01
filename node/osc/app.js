@@ -12,8 +12,8 @@ var osc = require('osc4node');
 var app = module.exports = express.createServer();
 var server = new ws({"httpServer" : app});
 
-var oscserver = new osc.Server(7771, '127.0.0.1')
-  , oscclient = new osc.Client('127.0.0.1', 7770);
+var oscserver = new osc.Server(12000, '127.0.0.1')
+  , oscclient = new osc.Client('127.0.0.1', 11000);
 
 // Configuration
 
@@ -66,10 +66,11 @@ server.on('request', function(request) {
 // OSC server
 //
 oscserver.on('oscmessage', function(msg, rinfo) {
-	console.log('oscmessage:' + msg.address);
+	console.log('oscmessage:address:' + msg.address);
+	console.log('oscmessage:typetag:' + msg.typetag);
 	for (var i = 0; i < msg.typetag.length; i++) {
 		if (msg.typetag[i] == 'i')
-			console.log('i:' + i + ":"+ parseInt(msg.arguments[i].value));
+			console.log('i:' + i + ":" + parseInt(msg.arguments[i].value));
 		else if (msg.typetag[i] == 'f')
 			console.log('f:' + i + ":" + parseFloat(msg.arguments[i].value));
 		else if (msg.typetag[i] == 's')
