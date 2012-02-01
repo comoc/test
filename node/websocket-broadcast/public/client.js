@@ -1,8 +1,8 @@
 $(function(){
 
 	var id = uuid();
-
-	var conn = new WebSocket("ws://localhost:8001/");
+	var host = location.host;
+	var conn = new WebSocket('ws://' + host + '/');
 
 	conn.onmessage = function(e){
 		var data = JSON.parse(e.data);
