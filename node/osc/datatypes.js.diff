@@ -1,0 +1,11 @@
+--- /Users/komori/Documents/test/node/osc/node_modules/osc4node/lib/osc4node/datatypes.js.orig	2012-02-01 22:30:12.000000000 +0900
++++ node_modules/osc4node/lib/osc4node/datatypes.js	2012-02-01 22:28:46.000000000 +0900
+@@ -5,7 +5,7 @@
+  ****************************************************
+  */
+ 
+-require.paths.unshift(__dirname + '/jspack');
++//require.paths.unshift(__dirname + '/jspack');
+ var jspack = require('jspack').jspack;
+ 
+ 
