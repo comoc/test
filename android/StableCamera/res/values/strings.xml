@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">StableCamera</string>
+    <string name="camera_alert">Device has only one camera!</string>
+    <string name="switch_cam">Switch camera</string>
+    <string name="flash_mode">Flash mode</string>
+    <string name="imageview_content_description">Image</string>
+    
+</resources>
