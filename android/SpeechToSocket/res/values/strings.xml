@@ -3,5 +3,11 @@
 
     <string name="hello">Hello World!</string>
     <string name="app_name">SpeechToSocket</string>
+    <string name="startFreeForm">Start free form</string>
+    <string name="startWebSearch">Start web search</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="ipAddressHint">Host name or IP address</string>
+    <string name="connected">Connected</string>
 
 </resources>
