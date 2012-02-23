@@ -77,7 +77,7 @@ public class SpeechToSocketActivity extends Activity {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				if (mOsc != null || b64str != null) {
+				if (mOsc != null && mAddress != null && b64str != null) {
 					try {
 						mOsc.send(new OSCMessage("/notify", new Object[] {
 								new Integer(mMsgId), new Integer(i), b64str}), mAddress);
@@ -150,7 +150,6 @@ public class SpeechToSocketActivity extends Activity {
 	
 	private OnClickListener mOnClickListener = new OnClickListener() {
 
-		@Override
 		public void onClick(View v) {
 			if (v.getId() == R.id.buttonConnect) {
 				if (mOsc != null) {
@@ -193,7 +192,7 @@ public class SpeechToSocketActivity extends Activity {
 					
 				} catch (IOException e) {
 				}
-
+				
 				return;
 			}
 			
@@ -208,7 +207,6 @@ public class SpeechToSocketActivity extends Activity {
 
 	private OSCListener mOscListener = new OSCListener() {
 
-		@Override
 		public void messageReceived(OSCMessage arg0, SocketAddress arg1,
 				long arg2) {
 			Log.v(SpeechToSocketActivity.class.toString(), "messageReceived:" + arg0.toString());
