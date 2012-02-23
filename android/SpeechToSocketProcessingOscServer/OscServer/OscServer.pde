@@ -6,12 +6,14 @@ OscP5 oscP5;
 NetAddress myRemoteLocation;
 final int INCOMMING_PORT = 57110;
 final int OUTGOING_PORT = 57111;
-
+PFont myFont;
 
 void setup() {
   size(400,400);
   frameRate(25);
   oscP5 = new OscP5(this,INCOMMING_PORT);
+  myFont = createFont("Osaka", 32);
+  textFont(myFont);
 }
 
 
@@ -43,6 +45,7 @@ void oscEvent(OscMessage theOscMessage) {
       try {
         bstr = new String(outdata, "UTF-8");
         println("" + i + ":" + bstr);
+        text(bstr, 10, 10 + i * 32);
       } catch (UnsupportedEncodingException e) {
         e.printStackTrace();
       }
