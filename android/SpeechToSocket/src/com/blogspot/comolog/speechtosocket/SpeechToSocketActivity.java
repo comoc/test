@@ -40,9 +40,6 @@ public class SpeechToSocketActivity extends Activity {
 	private OSCServer mOsc;
 	private InetSocketAddress mAddress;
 
-	// final OSCBundle bndl1, bndl2;
-	// final Integer nodeID;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,6 +55,28 @@ public class SpeechToSocketActivity extends Activity {
 		SharedPreferences pref = getSharedPreferences(PREF_KEY, Activity.MODE_PRIVATE);
 		EditText ip = (EditText)findViewById(R.id.editTextIpAddress);
 		ip.setText(pref.getString(KEY_TEXT, DEFAULT_IP_ADDRESS));
+
+		try {
+			mOsc = OSCServer.newUsing(OSCServer.UDP, INCOMMING_PORT);
+			mOsc.start();
+			mOsc.addOSCListener(mOscListener);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		if (mOsc != null) {
+			mOsc.removeOSCListener(mOscListener);
+			try {
+				mOsc.stop();
+			} catch (IOException e) {
+			}
+			mOsc.dispose();
+		}
+
+		super.onDestroy();
 	}
 
 	@Override
@@ -95,6 +114,35 @@ public class SpeechToSocketActivity extends Activity {
 	}
 
 	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		int action = event.getAction();
+		int keyCode = event.getKeyCode();
+		Log.v(SpeechToSocketActivity.class.toString(), "dispatchKeyEvent : keyCode:" + keyCode);
+		
+		if (true) {//action == KeyEvent.ACTION_DOWN) {
+			switch (keyCode) {
+			case KeyEvent.KEYCODE_CALL:
+				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_CALL");
+				return true;
+			case KeyEvent.KEYCODE_ENDCALL:
+				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_ENDCALL");
+				return true;
+			case KeyEvent.KEYCODE_VOLUME_UP:
+				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_VOLUME_UP");
+				return true;
+			case KeyEvent.KEYCODE_VOLUME_DOWN:
+				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_VOLUME_DOWN");
+				return true;
+			case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+				startSR(true);
+				return true;
+			}
+		}
+		
+		return super.dispatchKeyEvent(event);
+	}
+
+	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		Log.v(SpeechToSocketActivity.class.toString(), "onKeyDown : keyCode:" + keyCode);
 //		if (keyCode == 85) {
@@ -129,18 +177,13 @@ public class SpeechToSocketActivity extends Activity {
 	}
 	private void startSR(boolean isFree) {
 		try {
-			// 音声認識用インテント生成
-			Intent intent;
-			intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 			if (isFree)
 				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 						RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 			else
 				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 						RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-
-			// intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-			// R.string.check_pronounce_text);
 			startActivityForResult(intent, REQUEST_CODE);
 		} catch (ActivityNotFoundException e) {
 			Toast.makeText(SpeechToSocketActivity.this, e.toString(),
@@ -152,13 +195,6 @@ public class SpeechToSocketActivity extends Activity {
 
 		public void onClick(View v) {
 			if (v.getId() == R.id.buttonConnect) {
-				if (mOsc != null) {
-					try {
-						mOsc.stop();
-					} catch (IOException e) {
-					}
-					mOsc.dispose();
-				}
 				EditText ip = (EditText) findViewById(R.id.editTextIpAddress);
 				if (ip == null)
 					return;
@@ -178,21 +214,20 @@ public class SpeechToSocketActivity extends Activity {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-
-				try {
-					mOsc = OSCServer.newUsing(OSCServer.UDP, INCOMMING_PORT);
-					mAddress = new InetSocketAddress(s, OUTGOING_PORT);
-					//mOsc.setTarget();
-					mOsc.start();
-					mOsc.addOSCListener(mOscListener);
-					mOsc.send(new OSCMessage("/start", new Object[] {b64str}), mAddress);
-					String str = getString(R.string.connected) + ": " + s + ":" + OUTGOING_PORT;
-					Toast.makeText(SpeechToSocketActivity.this, str,
-							Toast.LENGTH_SHORT).show();
-					
-				} catch (IOException e) {
-				}
 				
+				if (!s.isEmpty()) {
+					mAddress = new InetSocketAddress(s, OUTGOING_PORT);
+					
+					if (b64str != null) {
+						try {
+							mOsc.send(new OSCMessage("/start", new Object[] {b64str}), mAddress);
+							String str = getString(R.string.connected) + ": " + s + ":" + OUTGOING_PORT;
+							Toast.makeText(SpeechToSocketActivity.this, str,
+									Toast.LENGTH_SHORT).show();					
+						} catch (IOException e) {
+						}
+					}
+				}
 				return;
 			}
 			
