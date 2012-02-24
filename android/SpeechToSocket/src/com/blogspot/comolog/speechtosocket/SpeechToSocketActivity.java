@@ -134,8 +134,27 @@ public class SpeechToSocketActivity extends Activity {
 				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_VOLUME_DOWN");
 				return true;
 			case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-				startSR(true);
+				if (action == KeyEvent.ACTION_DOWN)
+					startSR(true);
 				return true;
+			case KeyEvent.KEYCODE_MEDIA_NEXT:
+				break;
+			case KeyEvent.KEYCODE_MEDIA_PREVIOUS:				
+//			{
+//				KeyEvent newev = new KeyEvent(
+//						event.getDownTime(),
+//						event.getEventTime(),
+//						event.getAction(),
+//						KeyEvent.KEYCODE_BACK,
+//						event.getRepeatCount(),
+//						event.getMetaState(),
+//						event.getDeviceId(),
+//						event.getScanCode(),
+//						event.getFlags(),
+//						event.getSource());
+//				return super.dispatchKeyEvent(newev);
+//			}
+				break;
 			}
 		}
 		
@@ -176,6 +195,16 @@ public class SpeechToSocketActivity extends Activity {
 		return super.onKeyUp(keyCode, event);
 	}
 	private void startSR(boolean isFree) {
+		if (mOsc != null && mAddress != null) {
+			try {
+				mOsc.send(new OSCMessage("/start_sr"), mAddress);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
+		}
+		
+		
 		try {
 			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 			if (isFree)
@@ -220,7 +249,7 @@ public class SpeechToSocketActivity extends Activity {
 					
 					if (b64str != null) {
 						try {
-							mOsc.send(new OSCMessage("/start", new Object[] {b64str}), mAddress);
+							mOsc.send(new OSCMessage("/connect", new Object[] {b64str}), mAddress);
 							String str = getString(R.string.connected) + ": " + s + ":" + OUTGOING_PORT;
 							Toast.makeText(SpeechToSocketActivity.this, str,
 									Toast.LENGTH_SHORT).show();					

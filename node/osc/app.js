@@ -4,8 +4,9 @@
  */
 
 var express = require('express')
-  , routes = require('./routes')
-  , ws = require('websocket').server;
+  , routes = require('./routes');
+
+  var io      = require('socket.io').listen(app);
 
 var osc = require('osc4node');
 
