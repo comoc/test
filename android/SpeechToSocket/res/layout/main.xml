@@ -5,17 +5,26 @@
     android:orientation="vertical"
 	android:keepScreenOn="true">
 
-    <Button
-        android:id="@+id/buttonStartFreeForm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/startFreeForm" />
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <Button
-        android:id="@+id/buttonStartWebSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/startWebSearch" />
+        <Button
+            android:id="@+id/buttonStartFreeForm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@android:drawable/ic_menu_search"
+            android:text="@string/startFreeForm" />
+
+        <Button
+            android:id="@+id/buttonStartWebSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@android:drawable/ic_menu_search"
+            android:text="@string/startWebSearch" />
+
+    </LinearLayout>
 
     <EditText
         android:id="@+id/editTextResults"

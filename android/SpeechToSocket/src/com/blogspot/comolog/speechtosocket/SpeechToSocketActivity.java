@@ -19,6 +19,9 @@ import android.speech.RecognizerIntent;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -28,7 +31,11 @@ import android.widget.Toast;
 import de.sciss.net.*;
 
 public class SpeechToSocketActivity extends Activity {
+	private static final String TAG = "SpeechToSocketActivity";
+	
 	private static final int REQUEST_CODE = 0;
+    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+
 	private static final int OUTGOING_PORT = 57110;
 	private static final int INCOMMING_PORT = 57111;
 	
@@ -39,11 +46,16 @@ public class SpeechToSocketActivity extends Activity {
 	private int mMsgId = 0;
 	private OSCServer mOsc;
 	private InetSocketAddress mAddress;
+	private BluetoothChat mChat;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		
+		mChat = new BluetoothChat();
+		mChat.create(this, mListener);
+		
 		Button button;
 		button = (Button) findViewById(R.id.buttonStartFreeForm);
 		button.setOnClickListener(mOnClickListener);
@@ -75,41 +87,93 @@ public class SpeechToSocketActivity extends Activity {
 			}
 			mOsc.dispose();
 		}
+		
+		mChat.destroy();
 
 		super.onDestroy();
 	}
 
 	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		mChat.resume();
+		super.onResume();
+	}
+
+	@Override
+	protected void onStart() {
+		mChat.start();
+		super.onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-		if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-			String resultsString = "";
-			List<String> results = data
-					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-			for (int i = 0; i < results.size(); i++) {
-				String res = results.get(i);
-				resultsString += res + "\n";
-				byte[] b64str = null;
-				try {
-					b64str = Base64.encode(res.getBytes("UTF-8"), Base64.DEFAULT);
-				} catch (UnsupportedEncodingException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				if (mOsc != null && mAddress != null && b64str != null) {
+		switch (requestCode) {
+		case REQUEST_CODE:
+			if (resultCode == RESULT_OK) {
+				String resultsString = "";
+				List<String> results = data
+						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+				for (int i = 0; i < results.size(); i++) {
+					String res = results.get(i);
+					
+					SpeechToSocketActivity.this.mChat.sendMessage(res);
+
+					resultsString += res + "\n";
+					byte[] b64str = null;
 					try {
-						mOsc.send(new OSCMessage("/notify", new Object[] {
-								new Integer(mMsgId), new Integer(i), b64str}), mAddress);
-					} catch (IOException e) {
+						b64str = Base64.encode(res.getBytes("UTF-8"), Base64.DEFAULT);
+					} catch (UnsupportedEncodingException e1) {
 						// TODO Auto-generated catch block
-						//e.printStackTrace();
+						e1.printStackTrace();
+					}
+					if (mOsc != null && mAddress != null && b64str != null) {
+						try {
+							mOsc.send(new OSCMessage("/notify", new Object[] {
+									new Integer(mMsgId), new Integer(i), b64str}), mAddress);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							//e.printStackTrace();
+						}
 					}
 				}
+				TextView edit = (TextView) findViewById(R.id.editTextResults);
+				edit.clearComposingText();
+				edit.setText(resultsString);
 			}
-			TextView edit = (TextView) findViewById(R.id.editTextResults);
-			edit.clearComposingText();
-			edit.setText(resultsString);
+			break;
+        case REQUEST_CONNECT_DEVICE_SECURE:
+            // When DeviceListActivity returns with a device to connect
+            if (resultCode == Activity.RESULT_OK) {
+            	mChat.connectDevice(data);
+            }
+            break;
+        case BluetoothChat.REQUEST_ENABLE_BT:
+            // When the request to enable Bluetooth returns
+            if (resultCode == Activity.RESULT_OK) {
+                // Bluetooth is now enabled, so set up a chat session
+            	mChat.setupChat();
+            } else {
+                // User did not enable Bluetooth or an error occurred
+                Log.d(TAG, "BT not enabled");
+                Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
+                this.finish();
+            }
+            break;
 		}
+		
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
@@ -117,21 +181,21 @@ public class SpeechToSocketActivity extends Activity {
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		int action = event.getAction();
 		int keyCode = event.getKeyCode();
-		Log.v(SpeechToSocketActivity.class.toString(), "dispatchKeyEvent : keyCode:" + keyCode);
+		Log.v(TAG, "dispatchKeyEvent : keyCode:" + keyCode);
 		
 		if (true) {//action == KeyEvent.ACTION_DOWN) {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_CALL:
-				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_CALL");
+				Log.v(TAG, "KeyEvent.KEYCODE_CALL");
 				return true;
 			case KeyEvent.KEYCODE_ENDCALL:
-				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_ENDCALL");
+				Log.v(TAG, "KeyEvent.KEYCODE_ENDCALL");
 				return true;
 			case KeyEvent.KEYCODE_VOLUME_UP:
-				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_VOLUME_UP");
+				Log.v(TAG, "KeyEvent.KEYCODE_VOLUME_UP");
 				return true;
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
-				Log.v(SpeechToSocketActivity.class.toString(), "KeyEvent.KEYCODE_VOLUME_DOWN");
+				Log.v(TAG, "KeyEvent.KEYCODE_VOLUME_DOWN");
 				return true;
 			case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
 				if (action == KeyEvent.ACTION_DOWN)
@@ -163,7 +227,7 @@ public class SpeechToSocketActivity extends Activity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		Log.v(SpeechToSocketActivity.class.toString(), "onKeyDown : keyCode:" + keyCode);
+		Log.v(TAG, "onKeyDown : keyCode:" + keyCode);
 //		if (keyCode == 85) {
 //			return true;
 //		} else if (keyCode == 86) {
@@ -177,23 +241,46 @@ public class SpeechToSocketActivity extends Activity {
 
 	@Override
 	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-		Log.v(SpeechToSocketActivity.class.toString(), "onKeyLongPress : keyCode:" + keyCode);
+		Log.v(TAG, "onKeyLongPress : keyCode:" + keyCode);
 
 		return super.onKeyLongPress(keyCode, event);
 	}
 
 	@Override
 	public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
-		Log.v(SpeechToSocketActivity.class.toString(), "onKeyMultiple : keyCode:" + keyCode);
+		Log.v(TAG, "onKeyMultiple : keyCode:" + keyCode);
 
 		return super.onKeyMultiple(keyCode, repeatCount, event);
 	}
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		Log.v(SpeechToSocketActivity.class.toString(), "onKeyUp : keyCode:" + keyCode);
+		Log.v(TAG, "onKeyUp : keyCode:" + keyCode);
 		return super.onKeyUp(keyCode, event);
 	}
+	
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.secure_connect_scan:
+            // Launch the DeviceListActivity to see devices and do scan
+        	mChat.startDeviceListActivity(REQUEST_CONNECT_DEVICE_SECURE);
+            return true;
+        case R.id.discoverable:
+            // Ensure this device is discoverable by others
+        	mChat.ensureDiscoverable();
+            return true;        
+        }
+        return false;
+    }
+	
 	private void startSR(boolean isFree) {
 		if (mOsc != null && mAddress != null) {
 			try {
@@ -273,7 +360,7 @@ public class SpeechToSocketActivity extends Activity {
 
 		public void messageReceived(OSCMessage arg0, SocketAddress arg1,
 				long arg2) {
-			Log.v(SpeechToSocketActivity.class.toString(), "messageReceived:" + arg0.toString());
+			Log.v(TAG, "messageReceived:" + arg0.toString());
 			if (arg0.getName().equals("/n_end")) {
 				synchronized (mSync) {
 					mSync.notifyAll();
@@ -305,4 +392,18 @@ public class SpeechToSocketActivity extends Activity {
         }
         return null;
     }
+    
+    private BluetoothChat.Listener mListener = new BluetoothChat.Listener() {
+
+		@Override
+		public void recieveMessage(String str) {
+			// TODO Auto-generated method stub
+			if (str.charAt(0) == 'f')
+				startSR(true);
+			else if (str.charAt(0) == 'w')
+				startSR(false);
+			Log.v(TAG, str);
+		}
+    	
+    };
 }

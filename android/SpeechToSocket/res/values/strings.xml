@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">SpeechToSocket</string>
-    <string name="startFreeForm">Start free form</string>
-    <string name="startWebSearch">Start web search</string>
-    <string name="connect">Connect</string>
+    <string name="startFreeForm">Free form</string>
+    <string name="startWebSearch">Web search</string>
+    <string name="connect">Connect OSC</string>
     <string name="disconnect">Disconnect</string>
     <string name="ipAddressHint">Host name or IP address</string>
     <string name="connected">Connected</string>
@@ -31,7 +31,7 @@
     
 
     <!-- Options Menu -->
-    <string name="secure_connect">Connect a device - Secure</string>
+    <string name="secure_connect">Connect a device</string>
     <string name="discoverable">Make discoverable</string>
     
 </resources>
