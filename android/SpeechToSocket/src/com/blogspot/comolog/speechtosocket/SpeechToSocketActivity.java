@@ -128,8 +128,7 @@ public class SpeechToSocketActivity extends Activity {
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 				for (int i = 0; i < results.size(); i++) {
 					String res = results.get(i);
-					
-					SpeechToSocketActivity.this.mChat.sendMessage(res);
+					SpeechToSocketActivity.this.mChat.sendMessage(res + "\n");
 
 					resultsString += res + "\n";
 					byte[] b64str = null;
