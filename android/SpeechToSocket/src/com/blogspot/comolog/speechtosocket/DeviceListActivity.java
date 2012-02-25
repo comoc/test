@@ -1,6 +1,8 @@
-package com.blogspot.comolog.speechtosocket;
-
 /*
+ * This source code is derivative of DeviceListActivity.java.
+ * http://developer.android.com/resources/samples/BluetoothChat 
+ * Modified by Akihiro Komori on Feb. 26, 2012.
+ * 
  * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +17,8 @@ package com.blogspot.comolog.speechtosocket;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.blogspot.comolog.speechtosocket;
 
 import java.util.Set;
 
