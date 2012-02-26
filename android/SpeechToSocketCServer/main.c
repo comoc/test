@@ -117,7 +117,7 @@ int main(int argc, char *argv[])/*{{{*/
                     buffer[n] = '\0';
             }
             printf("%s\n", buffer);
-        } else {
+        } else if (s < 0) {
             break;
         }
     }
