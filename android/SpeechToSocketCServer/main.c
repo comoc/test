@@ -14,25 +14,21 @@
 
 #define SERIAL_DEVICE "/dev/tty.NexusOne-SpeechServer"
 #define BUFFER_SIZE 513
-
-
-int main(int argc, char *argv[])/*{{{*/
+    
+int open_serial(struct termios *oldoptions)
 {
-    char buffer[BUFFER_SIZE];
     int fd;
     struct termios options;
-    struct termios oldoptions;
     int baud = 9600;
-
+    
     /* open the serial port */
     fd = open(SERIAL_DEVICE, O_RDWR | O_NOCTTY);// | O_NONBLOCK);
     if(fd == -1) {
-        printf("Unable to open port %s\n", SERIAL_DEVICE);
-        exit(EXIT_FAILURE);
+        return fd;
     }
 
-    tcgetattr(fd,&oldoptions);
-    options = oldoptions;
+    tcgetattr(fd, oldoptions);
+    options = *oldoptions;
     switch(baud) {
     case 300:
         cfsetispeed(&options,B300);
@@ -89,9 +85,20 @@ int main(int argc, char *argv[])/*{{{*/
     options.c_cflag &= ~CSTOPB;
     options.c_cflag &= ~CSIZE;
     options.c_cflag |= CS8;
-    tcsetattr(fd,TCSANOW,&options);
+    tcsetattr(fd, TCSANOW, &options);
+    return fd;
+}
 
-    
+int main(int argc, char *argv[])/*{{{*/
+{
+    char buffer[BUFFER_SIZE];
+    struct termios oldoptions;
+    int fd = open_serial(&oldoptions);
+    if (fd == -1) {
+        printf("Unable to open port %s\n", SERIAL_DEVICE);
+        exit(EXIT_FAILURE);
+    }
+
     /* write a launch command of SpeechToSocketActivity */
     {
         char tmp[1] = {'f'};
@@ -99,7 +106,6 @@ int main(int argc, char *argv[])/*{{{*/
     }
 
     while (1) {
-        int numBytes;
         size_t s;
         printf("Wainting for read\n");
         s = read(fd, buffer, BUFFER_SIZE - 1);
@@ -115,6 +121,7 @@ int main(int argc, char *argv[])/*{{{*/
             break;
         }
     }
+    tcsetattr(fd, TCSANOW, &oldoptions);
     close(fd);
     printf("Connection closed\n");
 
