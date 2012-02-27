@@ -394,7 +394,6 @@ public class SpeechToSocketActivity extends Activity {
     
     private BluetoothChat.Listener mListener = new BluetoothChat.Listener() {
 
-		@Override
 		public void recieveMessage(String str) {
 			// TODO Auto-generated method stub
 			if (str.charAt(0) == 'f')
