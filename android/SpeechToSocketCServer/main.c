@@ -101,23 +101,44 @@ int main(int argc, char *argv[])/*{{{*/
 
     /* write a launch command of SpeechToSocketActivity */
     {
-        char tmp[1] = {'f'};
-        write(fd, tmp, 1);
+        char tmp[] = "f";
+        write(fd, tmp, sizeof(tmp));
     }
+        
+    ssize_t s;
+    char c; 
+    int m; 
 
     while (1) {
-        size_t s;
+        m = 0;
+
+        /* read until '\n' */
         printf("Wainting for read\n");
-        s = read(fd, buffer, BUFFER_SIZE - 1);
-        if (s > 0) {
-            int n = s - 1;
-            buffer[s] = '\0';
-            for ( ; n >= 0; n--) {
-                if (buffer[n] == '\n')
-                    buffer[n] = '\0';
+        while (1) {
+            s = read(fd, &c, 1);
+            if (s < 0) {
+                break;
+            } else if (s > 0) {
+                if (c == '\n') {
+                    buffer[m] = '\0';
+                    break;
+                } else {
+                    buffer[m] = c;
+                    m++;
+                    if (m >= BUFFER_SIZE - 1) {
+                        buffer[m] = '\0';
+                        break;
+                    }
+                }
             }
+        }
+
+        /* print the result */
+        if (m > 0) {
             printf("%s\n", buffer);
-        } else if (s < 0) {
+        }
+
+        if (s < 0) {
             break;
         }
     }
