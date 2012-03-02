@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent" android:layout_height="match_parent"
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
 	android:keepScreenOn="true">
- -->	
+ <!--
 <android.gesture.GestureOverlayView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/gestures"
@@ -13,7 +15,7 @@
     android:eventsInterceptionEnabled="true"
     android:orientation="vertical"
     android:keepScreenOn="true">
-    	
+-->    	
 
 	<FrameLayout
 		android:layout_width="match_parent"
@@ -41,9 +43,9 @@
 
 			<EditText android:id="@+id/editTextResults"
 				android:layout_width="match_parent" android:layout_height="wrap_content"
-				android:lines="10" android:inputType="textMultiLine"
+				android:inputType="textMultiLine"
 				android:gravity="top|left" android:focusable="false"
-				android:focusableInTouchMode="false">
+				android:focusableInTouchMode="false" android:lines="5">
 
 <!--
  				<requestFocus />
@@ -53,17 +55,13 @@
 			<LinearLayout android:id="@+id/linearLayout1"
 				android:layout_width="match_parent" android:layout_height="wrap_content">
 			</LinearLayout>
-
-			<EditText android:id="@+id/editTextIpAddress"
-				android:layout_width="match_parent" android:layout_height="wrap_content"
-				android:inputType="textUri" android:hint="@string/ipAddressHint" android:visibility="invisible"/>
-
-			<Button android:id="@+id/buttonConnect" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:text="@string/connect" android:visibility="invisible"/>
+			<View android:layout_height="match_parent" android:layout_width="match_parent" android:background="#808080" android:id="@+id/viewTouch"></View>
 
 
 		</LinearLayout>
 	</FrameLayout>
-<!-- </LinearLayout> -->
+</LinearLayout>
 
+<!-- 
 </android.gesture.GestureOverlayView>
+-->

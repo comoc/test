@@ -7,28 +7,142 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 
-	<script src="/socket.io/socket.io.js"></script>
+	<script src="/socket.io/socket.io.js"></script>	
 	<script>
+		var left = 37;
+		var right = 39;
+
 		$(function() {
 			var host = location.host;
 			var socket = io.connect('http://' + host);
   			socket.on('from_serial', function (data) {
-				$('#log').append(data.my + '<br>';
-  				console.log(data.my);
+				//				$('#log').html(data.my + '<br>');
+				if (data.my.indexOf('DIRL') == 0) {
+					sendKeyEvent(true, right);
+					sendKeyEvent(false, right);
+				} else if (data.my.indexOf('DIRR') == 0) {
+					sendKeyEvent(true, left);
+					sendKeyEvent(false, left);
+				} else if (data.my.indexOf('DIRU') == 0) {
+					if (player) {
+						player.playVideo();
+					}
+				} else if (data.my.indexOf('DIRD') == 0) {
+					if (player) {
+						player.stopVideo();
+					}
+				}
+				console.log(data.my);
+
 			});
 
-//socket.emit('my other event', { my: 'data' });
-//			if (socket) {
-//				var jsons = JSON.stringify(res);
-//				socket.emit('from_client', jsons);
-//			}
+			function sendKeyEvent(isPress, keyCode) {
+				if (isPress) {
+					var e = jQuery.Event("keydown");
+					e.which = keyCode;
+					$('#main').trigger(e);
+				}
+				else {
+					var e = jQuery.Event("keydup");
+					e.which = keyCode;
+					$('#main').trigger(e);
+				}
+			}
+
+
 		});
 	</script>
+	
+	<script src="imakewebthings-deck.js-227b6b7/modernizr.custom.js"></script>
+
+	<!-- Core and extension CSS files -->
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/core/deck.core.css">
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/navigation/deck.navigation.css">
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/status/deck.status.css">
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/hash/deck.hash.css">
+	
+	<!-- Style theme. More available in /themes/style/ or create your own. -->
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/style/neon.css">
+	
+	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
+	<!-- <link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/transition/horizontal-slide.css"> -->
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/transition/fade.css">
+
+
+	<style type="text/css">
+	</style>
 </head>
 
-<body class="home">
-	<div id="log"></div>
+<body class="deck-container" id="main">
+	<section class="slide" id="title-slide">
+	<div id="player1"></div>
+	<script>
+	  // @see https://developers.google.com/youtube/iframe_api_reference
+      var tag = document.createElement('script');
+      tag.src = "http://www.youtube.com/player_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      var player;
+      function onYouTubePlayerAPIReady() {
+        player = new YT.Player('player1', {
+          height: '480',
+          width: '853',
+          videoId: 't3TmFyyB4zI',
+        });
+      }
+	</script>
+</section>
+<section class="slide" id="slide-2">
+	<iframe width="853" height="480" src="http://www.youtube.com/embed/B4PRBIXkMUc?enablejsapi=1&playerapiid=ytplayer2" frameborder="0" allowfullscreen></iframe>
+</section>
+<section class="slide" id="slide-3">
+	<iframe width="853" height="480" src="http://www.youtube.com/embed/wsGVYFBxY88?enablejsapi=1&playerapiid=ytplayer3" frameborder="0" allowfullscreen></iframe>
+</section>
+
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+
+<!-- Grab CDN jQuery, with a protocol relative URL; fall back to local if offline -->
+<script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+<script>window.jQuery || document.write('<script src="../jquery-1.7.min.js"><\/script>')</script>
+
+<!-- Deck Core and extensions -->
+<script src="imakewebthings-deck.js-227b6b7/core/deck.core.js"></script>
+<script src="imakewebthings-deck.js-227b6b7/extensions/hash/deck.hash.js"></script>
+<script src="imakewebthings-deck.js-227b6b7/extensions/menu/deck.menu.js"></script>
+<script src="imakewebthings-deck.js-227b6b7/extensions/goto/deck.goto.js"></script>
+<script src="imakewebthings-deck.js-227b6b7/extensions/status/deck.status.js"></script>
+<script src="imakewebthings-deck.js-227b6b7/extensions/navigation/deck.navigation.js"></script>
+
+<!-- Initialize the deck -->
+<script>
+$(function() {
+	$.deck('.slide');
+});
+</script>
+</div>
 </body>
 </html>
-
-

@@ -1,30 +1,14 @@
 package com.blogspot.comolog.speechtosocket;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.gesture.Gesture;
-import android.gesture.GestureLibraries;
-import android.gesture.GestureLibrary;
-import android.gesture.GestureOverlayView;
-import android.gesture.Prediction;
-import android.graphics.PointF;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.util.Base64;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,11 +16,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import de.sciss.net.*;
 
 public class SpeechToSocketActivity extends Activity {
 	private static final String TAG = "SpeechToSocketActivity";
@@ -44,23 +27,17 @@ public class SpeechToSocketActivity extends Activity {
 	private static final int REQUEST_CODE = 0;
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
 
-	private static final int OUTGOING_PORT = 57110;
-	private static final int INCOMMING_PORT = 57111;
-	
-	private static final String PREF_KEY = "preferenceTest";
-	private static final String KEY_TEXT = "text";
-	private static final String DEFAULT_IP_ADDRESS = "192.168.0.2";
+    private static final String TAG_SEARCH = "SEAR";
+    private static final String TAG_DIRECTION_UP = "DIRU";
+    private static final String TAG_DIRECTION_DOWN = "DIRD";
+    private static final String TAG_DIRECTION_LEFT = "DIRL";
+    private static final String TAG_DIRECTION_RIGHT = "DIRR";
+    private static final String TAG_TOUCH = "TOUC";
+    private static final String TAG_TAP = "TAP_";
+    
+	private static final float TORELANCE = 200.0f;
 
-	private final Object mSync = new Object();
-	private int mMsgId = 0;
-	private OSCServer mOsc;
-	private InetSocketAddress mAddress;
 	private BluetoothChat mChat;
-
-	private GestureLibrary mLibrary;
-	
-	private PointF mGestureStartPoint;
-	private PointF mGestureEndPoint;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,45 +52,14 @@ public class SpeechToSocketActivity extends Activity {
 		button.setOnClickListener(mOnClickListener);
 		button = (Button) findViewById(R.id.buttonStartWebSearch);
 		button.setOnClickListener(mOnClickListener);
-		button = (Button) findViewById(R.id.buttonConnect);
-		button.setOnClickListener(mOnClickListener);
 		
-		GestureOverlayView gestures = (GestureOverlayView) findViewById(R.id.gestures);
-		gestures.addOnGesturePerformedListener(mGesturePerformedListener);
-		gestures.addOnGestureListener(mGestureListener);
-		mLibrary = GestureLibraries.fromRawResource(this, R.raw.gestures);
-		if (!mLibrary.load())
-			finish();
-		
-		mGestureStartPoint = new PointF();
-		mGestureEndPoint = new PointF();
-		
-		SharedPreferences pref = getSharedPreferences(PREF_KEY, Activity.MODE_PRIVATE);
-		EditText ip = (EditText)findViewById(R.id.editTextIpAddress);
-		ip.setText(pref.getString(KEY_TEXT, DEFAULT_IP_ADDRESS));
-
-		try {
-			mOsc = OSCServer.newUsing(OSCServer.UDP, INCOMMING_PORT);
-			mOsc.start();
-			mOsc.addOSCListener(mOscListener);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		View view = findViewById(R.id.viewTouch);
+		view.setOnTouchListener(mTouchListener);
 	}
 
 	@Override
-	protected void onDestroy() {
-		if (mOsc != null) {
-			mOsc.removeOSCListener(mOscListener);
-			try {
-				mOsc.stop();
-			} catch (IOException e) {
-			}
-			mOsc.dispose();
-		}
-		
+	protected void onDestroy() {		
 		mChat.destroy();
-
 		super.onDestroy();
 	}
 
@@ -152,24 +98,8 @@ public class SpeechToSocketActivity extends Activity {
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 				for (int i = 0; i < results.size(); i++) {
 					String res = results.get(i);
-					mChat.sendMessage(res + "\n");
+					mChat.sendMessage(TAG_SEARCH + res + "\n");
 					resultsString += res + "\n";
-					byte[] b64str = null;
-					try {
-						b64str = Base64.encode(res.getBytes("UTF-8"), Base64.DEFAULT);
-					} catch (UnsupportedEncodingException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					if (mOsc != null && mAddress != null && b64str != null) {
-						try {
-							mOsc.send(new OSCMessage("/notify", new Object[] {
-									new Integer(mMsgId), new Integer(i), b64str}), mAddress);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							//e.printStackTrace();
-						}
-					}
 				}
 				TextView edit = (TextView) findViewById(R.id.editTextResults);
 				edit.clearComposingText();
@@ -304,16 +234,7 @@ public class SpeechToSocketActivity extends Activity {
     }
 	
 	private void startSR(boolean isFree) {
-		if (mOsc != null && mAddress != null) {
-			try {
-				mOsc.send(new OSCMessage("/start_sr"), mAddress);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			}
-		}
-		
-		
+
 		try {
 			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 			if (isFree)
@@ -332,43 +253,7 @@ public class SpeechToSocketActivity extends Activity {
 	private OnClickListener mOnClickListener = new OnClickListener() {
 
 		public void onClick(View v) {
-			if (v.getId() == R.id.buttonConnect) {
-				EditText ip = (EditText) findViewById(R.id.editTextIpAddress);
-				if (ip == null)
-					return;
-				String s = ip.getText().toString();
-				if (s.isEmpty())
-					return;
-				SharedPreferences pref = getSharedPreferences(PREF_KEY, Activity.MODE_PRIVATE);
-				SharedPreferences.Editor editor = pref.edit();
-				editor.putString(KEY_TEXT, s);
-				editor.commit();
 
-				String ipAddr = SpeechToSocketActivity.this.getIpAddress();
-				byte[] b64str = null;
-				try {
-					b64str = Base64.encode(ipAddr.getBytes("UTF-8"), Base64.DEFAULT);
-				} catch (UnsupportedEncodingException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				
-				if (!s.isEmpty()) {
-					mAddress = new InetSocketAddress(s, OUTGOING_PORT);
-					
-					if (b64str != null) {
-						try {
-							mOsc.send(new OSCMessage("/connect", new Object[] {b64str}), mAddress);
-							String str = getString(R.string.connected) + ": " + s + ":" + OUTGOING_PORT;
-							Toast.makeText(SpeechToSocketActivity.this, str,
-									Toast.LENGTH_SHORT).show();					
-						} catch (IOException e) {
-						}
-					}
-				}
-				return;
-			}
-			
 			int id = v.getId(); 
 
 			if (id == R.id.buttonStartFreeForm)
@@ -377,44 +262,7 @@ public class SpeechToSocketActivity extends Activity {
 				startSR(false);
 		}
 	};
-
-	private OSCListener mOscListener = new OSCListener() {
-
-		public void messageReceived(OSCMessage arg0, SocketAddress arg1,
-				long arg2) {
-			Log.v(TAG, "messageReceived:" + arg0.toString());
-			if (arg0.getName().equals("/n_end")) {
-				synchronized (mSync) {
-					mSync.notifyAll();
-				}
-			} else if (arg0.getName().equals("/kick_free")) {
-				startSR(true);
-			} else if (arg0.getName().equals("/kick_web")) {
-				startSR(false);
-			}
-		}
-	};
 	
-    private String getIpAddress() {
-        Enumeration<NetworkInterface> netIFs;
-        try {
-            netIFs = NetworkInterface.getNetworkInterfaces();
-            while( netIFs.hasMoreElements() ) {
-                NetworkInterface netIF = netIFs.nextElement();
-                Enumeration<InetAddress> ipAddrs = netIF.getInetAddresses();
-                while( ipAddrs.hasMoreElements() ) {
-                    InetAddress ip = ipAddrs.nextElement();
-                    if( ! ip.isLoopbackAddress() ) {
-                        return ip.getHostAddress().toString();
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
     private BluetoothChat.Listener mChatListener = new BluetoothChat.Listener() {
 
 		public void recieveMessage(String str) {
@@ -424,56 +272,82 @@ public class SpeechToSocketActivity extends Activity {
 				startSR(false);
 			Log.v(TAG, str);
 		}
-    	
     };
     
-    private GestureOverlayView.OnGestureListener mGestureListener = new GestureOverlayView.OnGestureListener() {
+    private OnTouchListener mTouchListener = new OnTouchListener() {
 
-		public void onGesture(GestureOverlayView arg0, MotionEvent arg1) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		public void onGestureCancelled(GestureOverlayView overlay,
-				MotionEvent event) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		public void onGestureEnded(GestureOverlayView overlay, MotionEvent event) {
-			mGestureEndPoint.set(event.getX(), event.getY());
-		}
-
-		public void onGestureStarted(GestureOverlayView overlay,
-				MotionEvent event) {
-			mGestureStartPoint.set(event.getX(), event.getY());
-		}
-    	
-    };
-    
-    private GestureOverlayView.OnGesturePerformedListener mGesturePerformedListener = new GestureOverlayView.OnGesturePerformedListener() {
-
-		public void onGesturePerformed(GestureOverlayView arg0, Gesture arg1) {
-			// TODO Auto-generated method stub
-			if (!mLibrary.getGestureEntries().isEmpty()) {
-				ArrayList<Prediction> predictions = mLibrary.recognize(arg1);
-				if (predictions.size() > 0) {
-					Prediction prediction = predictions.get(0);
-					//if (prediction.score > 1.0) {
-						float x = mGestureEndPoint.x - mGestureStartPoint.x;
-						//float y = mGestureEndPoint.y - mGestureStartPoint.y;
-						final float TRUNCATE = 10.0f;
-						if (x > TRUNCATE) {
-							Toast.makeText(SpeechToSocketActivity.this, "onGesturePerformed : "
-									 + prediction.name + " ->", Toast.LENGTH_SHORT).show();							
-						} else if (x < -TRUNCATE) {
-							Toast.makeText(SpeechToSocketActivity.this, "onGesturePerformed : "
-									 + prediction.name + " <-", Toast.LENGTH_SHORT).show();						
-						}
-					//}
-				}
+		public boolean onTouch(View v, MotionEvent event) {
+			if (!mGestureDetector.onTouchEvent(event)) {
+				mChat.sendMessage(TAG_TOUCH + (int)event.getX() + "," + (int)event.getX() + "\n");
 			}
+			return true;
 		}
     	
     };
+    
+    private GestureDetector mGestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
+
+		public boolean onDown(MotionEvent e) {
+			Log.v(TAG, "onDown");
+			return true;
+		}
+
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			{
+				Log.v(TAG, "velocityX:" + velocityX);
+				Log.v(TAG, "velocityY:" + velocityY);
+			}
+			
+			float avx = Math.abs(velocityX);
+			float avy = Math.abs(velocityY);
+			if (avx - avy > TORELANCE) {
+				if (velocityX > TORELANCE) {
+					// right
+					mChat.sendMessage(TAG_DIRECTION_RIGHT + "\n");
+				} else if (velocityX < -TORELANCE) {
+					// left
+					mChat.sendMessage(TAG_DIRECTION_LEFT + "\n");
+				}
+			} else if (avy - avx > TORELANCE) {
+				if (velocityY > TORELANCE) {
+					// down
+					mChat.sendMessage(TAG_DIRECTION_DOWN + "\n");
+				} else if (velocityY < -TORELANCE) {
+					// up
+					mChat.sendMessage(TAG_DIRECTION_UP + "\n");
+				}				
+			}
+			
+			return true;
+		}
+
+		public void onLongPress(MotionEvent e) {
+			Log.v(TAG, "onLongPress");
+		}
+
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+//			Log.v(TAG, "distanceX:" + distanceX);
+//			Log.v(TAG, "distanceY:" + distanceY);
+			return false;
+		}
+
+		public void onShowPress(MotionEvent e) {
+			Log.v(TAG, "onShowPress");
+		}
+
+		public boolean onSingleTapUp(MotionEvent e) {
+			return true;
+		}
+		
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			Log.v(TAG, "onSingleTapConfirmed");
+			mChat.sendMessage(TAG_TAP + "\n");
+			return true;
+		}
+
+    	
+    });
+    
 }

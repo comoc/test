@@ -14,7 +14,9 @@ var sp = new SerialPort('/dev/tty.NexusOne-SpeechServer', {
 
 sp.on('data', function (data) {
 	if (sock)
-		sock.emit('from_serial', {my: data.toString()});
+		sock.emit('from_serial', {
+			my: data.toString()
+		});
   	console.log(data.toString());
 });
 
