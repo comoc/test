@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -14,6 +15,12 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.gesture.Gesture;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
+import android.gesture.GestureOverlayView;
+import android.gesture.Prediction;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Base64;
@@ -22,6 +29,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -42,19 +50,25 @@ public class SpeechToSocketActivity extends Activity {
 	private static final String PREF_KEY = "preferenceTest";
 	private static final String KEY_TEXT = "text";
 	private static final String DEFAULT_IP_ADDRESS = "192.168.0.2";
-	final Object mSync = new Object();
+
+	private final Object mSync = new Object();
 	private int mMsgId = 0;
 	private OSCServer mOsc;
 	private InetSocketAddress mAddress;
 	private BluetoothChat mChat;
 
+	private GestureLibrary mLibrary;
+	
+	private PointF mGestureStartPoint;
+	private PointF mGestureEndPoint;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		
 		mChat = new BluetoothChat();
-		mChat.create(this, mListener);
+		mChat.create(this, mChatListener);
 		
 		Button button;
 		button = (Button) findViewById(R.id.buttonStartFreeForm);
@@ -63,6 +77,16 @@ public class SpeechToSocketActivity extends Activity {
 		button.setOnClickListener(mOnClickListener);
 		button = (Button) findViewById(R.id.buttonConnect);
 		button.setOnClickListener(mOnClickListener);
+		
+		GestureOverlayView gestures = (GestureOverlayView) findViewById(R.id.gestures);
+		gestures.addOnGesturePerformedListener(mGesturePerformedListener);
+		gestures.addOnGestureListener(mGestureListener);
+		mLibrary = GestureLibraries.fromRawResource(this, R.raw.gestures);
+		if (!mLibrary.load())
+			finish();
+		
+		mGestureStartPoint = new PointF();
+		mGestureEndPoint = new PointF();
 		
 		SharedPreferences pref = getSharedPreferences(PREF_KEY, Activity.MODE_PRIVATE);
 		EditText ip = (EditText)findViewById(R.id.editTextIpAddress);
@@ -128,8 +152,7 @@ public class SpeechToSocketActivity extends Activity {
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 				for (int i = 0; i < results.size(); i++) {
 					String res = results.get(i);
-					SpeechToSocketActivity.this.mChat.sendMessage(res + "\n");
-
+					mChat.sendMessage(res + "\n");
 					resultsString += res + "\n";
 					byte[] b64str = null;
 					try {
@@ -392,15 +415,64 @@ public class SpeechToSocketActivity extends Activity {
         return null;
     }
     
-    private BluetoothChat.Listener mListener = new BluetoothChat.Listener() {
+    private BluetoothChat.Listener mChatListener = new BluetoothChat.Listener() {
 
 		public void recieveMessage(String str) {
-			// TODO Auto-generated method stub
 			if (str.charAt(0) == 'f')
 				startSR(true);
 			else if (str.charAt(0) == 'w')
 				startSR(false);
 			Log.v(TAG, str);
+		}
+    	
+    };
+    
+    private GestureOverlayView.OnGestureListener mGestureListener = new GestureOverlayView.OnGestureListener() {
+
+		public void onGesture(GestureOverlayView arg0, MotionEvent arg1) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void onGestureCancelled(GestureOverlayView overlay,
+				MotionEvent event) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void onGestureEnded(GestureOverlayView overlay, MotionEvent event) {
+			mGestureEndPoint.set(event.getX(), event.getY());
+		}
+
+		public void onGestureStarted(GestureOverlayView overlay,
+				MotionEvent event) {
+			mGestureStartPoint.set(event.getX(), event.getY());
+		}
+    	
+    };
+    
+    private GestureOverlayView.OnGesturePerformedListener mGesturePerformedListener = new GestureOverlayView.OnGesturePerformedListener() {
+
+		public void onGesturePerformed(GestureOverlayView arg0, Gesture arg1) {
+			// TODO Auto-generated method stub
+			if (!mLibrary.getGestureEntries().isEmpty()) {
+				ArrayList<Prediction> predictions = mLibrary.recognize(arg1);
+				if (predictions.size() > 0) {
+					Prediction prediction = predictions.get(0);
+					//if (prediction.score > 1.0) {
+						float x = mGestureEndPoint.x - mGestureStartPoint.x;
+						//float y = mGestureEndPoint.y - mGestureStartPoint.y;
+						final float TRUNCATE = 10.0f;
+						if (x > TRUNCATE) {
+							Toast.makeText(SpeechToSocketActivity.this, "onGesturePerformed : "
+									 + prediction.name + " ->", Toast.LENGTH_SHORT).show();							
+						} else if (x < -TRUNCATE) {
+							Toast.makeText(SpeechToSocketActivity.this, "onGesturePerformed : "
+									 + prediction.name + " <-", Toast.LENGTH_SHORT).show();						
+						}
+					//}
+				}
+			}
 		}
     	
     };

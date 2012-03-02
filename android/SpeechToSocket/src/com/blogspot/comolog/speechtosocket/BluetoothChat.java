@@ -27,6 +27,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -61,6 +62,11 @@ public class BluetoothChat {
     private BluetoothChatService mChatService = null;
 
     private Activity mActivity;
+    
+	private static final byte[] HEADER = {0x1b};
+	private static final byte[] BLOB_MARKER = {'b'};    	
+	private static final byte[] FOOTER = {'\n'};
+    
     
     public interface Listener {
     	void recieveMessage(String str);
@@ -151,6 +157,28 @@ public class BluetoothChat {
             // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
             mChatService.write(send);
+        }
+    }
+
+    /**
+     * Sends a blob.
+     * @param bytes  Byte array to send.
+     */
+    public void sendBlob(byte[] bytes) {
+        // Check that we're actually connected before trying anything
+        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+            Toast.makeText(mActivity, R.string.not_connected, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check that there's actually something to send
+        if (bytes.length > 0) {
+            // Get the message bytes and tell the BluetoothChatService to write
+            mChatService.write(HEADER);    	
+            mChatService.write(BLOB_MARKER);  	
+			byte[] b64str = Base64.encode(bytes, Base64.DEFAULT);
+            mChatService.write(b64str);
+            mChatService.write(FOOTER);      	
         }
     }
 

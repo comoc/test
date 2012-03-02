@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+
+	<title>x-webkit-speech test</title>
+	<meta name="author" content="Akihiro Komori">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		$(function() {
+			var host = location.host;
+			var socket = io.connect('http://' + host);
+			
+
+			$('#utterance').bind('webkitspeechchange', speechChange);
+
+
+			function speechChange(e) {
+				var event = e.originalEvent;
+				if (event.type == 'webkitspeechchange' && event.results) {
+					var res = new Array(); 
+					for (var i = 0;i < event.results.length; i++) {
+						console.log(event.results[i].utterance + ', confidence:' + event.results[i].confidence);
+						res[i] = new Array();
+						res[i][0] = event.results[i].utterance;
+						res[i][1] = event.results[i].confidence;
+					}
+
+					if(socket){
+						var jsons = JSON.stringify(res);
+						socket.emit('my_event', jsons);
+					}
+
+				}
+			}
+
+			
+		});
+
+	</script>
+</head>
+
+<body class="home">
+	<div class="main">
+		<form>
+			<input type="text" id="utterance" x-webkit-speech />
+		</form>
+	</div><!-- .main -->
+
+</body>
+</html>
+
+
