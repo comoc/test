@@ -29,7 +29,7 @@
 					}
 				} else if (data.my.indexOf('DIRD') == 0) {
 					if (player) {
-						player.stopVideo();
+						player.pauseVideo();
 					}
 				}
 				console.log(data.my);
@@ -67,18 +67,21 @@
 	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/style/neon.css">
 	
 	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
-	<!-- <link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/transition/horizontal-slide.css"> -->
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/transition/fade.css">
+	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/transition/horizontal-slide.css">
 
 
 	<style type="text/css">
+		p.title {
+			text-align: center;
+		}
 	</style>
 </head>
 
 <body class="deck-container" id="main">
 	<section class="slide" id="title-slide">
-	<div id="player1"></div>
+	<div id="ytplayer"></div>
 	<script>
+	  // @see https://developers.google.com/youtube/js_api_reference
 	  // @see https://developers.google.com/youtube/iframe_api_reference
       var tag = document.createElement('script');
       tag.src = "http://www.youtube.com/player_api";
@@ -86,19 +89,22 @@
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
       var player;
       function onYouTubePlayerAPIReady() {
-        player = new YT.Player('player1', {
+        player = new YT.Player('ytplayer', {
           height: '480',
           width: '853',
           videoId: 't3TmFyyB4zI',
         });
       }
 	</script>
+	<p class='title'>Video 1</p>
 </section>
 <section class="slide" id="slide-2">
 	<iframe width="853" height="480" src="http://www.youtube.com/embed/B4PRBIXkMUc?enablejsapi=1&playerapiid=ytplayer2" frameborder="0" allowfullscreen></iframe>
+	<p class='title'>Video 2</p>
 </section>
 <section class="slide" id="slide-3">
 	<iframe width="853" height="480" src="http://www.youtube.com/embed/wsGVYFBxY88?enablejsapi=1&playerapiid=ytplayer3" frameborder="0" allowfullscreen></iframe>
+	<p class='title'>Video 3</p>
 </section>
 
 

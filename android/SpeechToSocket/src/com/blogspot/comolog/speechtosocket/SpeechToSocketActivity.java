@@ -98,7 +98,7 @@ public class SpeechToSocketActivity extends Activity {
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 				for (int i = 0; i < results.size(); i++) {
 					String res = results.get(i);
-					mChat.sendMessage(TAG_SEARCH + res + "\n");
+					mChat.sendMessage(TAG_SEARCH + "," + i + "," + res + "\n");
 					resultsString += res + "\n";
 				}
 				TextView edit = (TextView) findViewById(R.id.editTextResults);
@@ -278,7 +278,7 @@ public class SpeechToSocketActivity extends Activity {
 
 		public boolean onTouch(View v, MotionEvent event) {
 			if (!mGestureDetector.onTouchEvent(event)) {
-				mChat.sendMessage(TAG_TOUCH + (int)event.getX() + "," + (int)event.getX() + "\n");
+				mChat.sendMessage(TAG_TOUCH + "," + (int)event.getX() + "," + (int)event.getX() + "\n");
 			}
 			return true;
 		}
