@@ -30,12 +30,60 @@ $(function () {
 	var page = 1;
 	var pageSize = 18;  
 
-	
+	var cursor;
+
 	$(document).ready(function() {
-//		$("#general").focus();
+		//		$("#general").focus();
+		createCursor();
 	});
 
-	function add_item_to_page(i, item) {
+	function createCursor() {
+    	cursor = $('#cursor');
+    	if (!cursor.attr('id')) {
+    	  cursor = $('<img>');
+    	  cursor.attr('class', 'cursor');
+    	  cursor.attr('id', 'cursor');
+    	  cursor.attr('src', 'cursor.png');
+    	  cursor.css('position', 'fixed');
+    	  cursor.css('width', '24px');
+    	  cursor.css('height', '24px');
+    	  $('#wrapper').append(cursor);
+	  }
+
+    	cursor.css('left', '0px');
+    	cursor.css('top', '0px');
+    	cursor.show();
+    	//setTimeout(function() {
+    	//  cursor.hide();
+	  	//}, 10000);
+	}
+	function moveCursor(dx, dy) {
+		if (cursor) {
+			var pos = cursor.position();
+			var l = parseInt(pos.left) + dx;
+			var t = parseInt(pos.top) + dy;
+			var lmin = -cursor.width() / 3;
+			var tmin = -cursor.height() / 5;
+			var lmax = $(document).width() + lmin;
+			var tmax = $(document).height() + tmin;
+			if (l < lmin) {
+				l = lmin;
+			} else if (l > lmax) {
+				l = lmax;
+			}
+			if (t < tmin) {
+				t = tmin;
+			} else if (t > tmax) {
+				t = tmax;
+			}
+			console.log('l:' + l);
+			console.log('t:' + t);
+			cursor.css('left', l + 'px');
+			cursor.css('top', t + 'px');
+		}
+	}
+
+	function addItemToGridContent(i, item) {
 		if (i == 0)
 			$("#grid-content").empty();
 
@@ -67,7 +115,7 @@ $(function () {
 				var thumbnailUrl = item.media$group.media$thumbnail[0].url;  
 				var playerUrl = item.media$group.media$content[0].url;
 				console.log("getJson" + i + ", " + thumbnailUrl);
-				add_item_to_page(
+				addItemToGridContent(
 					i,
 					'<li>'
 					+ '<a href="javascript:loadVideo(\''
@@ -128,7 +176,17 @@ $(function () {
 		} else if (data.my.indexOf('SEAR,0,') == 0) {
 			var query = data.my.substring(7);
 			searchVideo(query);
+		} else if (data.my.indexOf('TOUC,') == 0) {
+			var xyc = data.my.substring(5);
+			if (xyc) {
+				var xy = xyc.split(',');
+				if (xy && xy.length >= 2) {
+					console.log(parseInt(xy[0]));
+					moveCursor(-parseInt(xy[0]), -parseInt(xy[1]));
+				}
+			}
 		}
+
 		console.log(data.my);
 	
 	});
@@ -201,63 +259,64 @@ $(function () {
     });
 
 
-});
-
-function playPauseVideo() {
-	player = document.getElementById('player');
-	if (player) {
-		var s = player.getPlayerState();
-		if (s == 1) {
-			player.pauseVideo();
-		} else if (s == 2 || s == 0) {
+	function playPauseVideo() {
+		player = document.getElementById('player');
+		if (player) {
+			var s = player.getPlayerState();
+			if (s == 1) {
+				player.pauseVideo();
+			} else if (s == 2 || s == 0) {
+				player.playVideo();
+			}
+		}
+	}
+	
+	function skipVideo(secFromNow) {
+		if (player) {
+			var dur = player.getDuration();
+			var to = secFromNow + player.getCurrentTime();
+			if (to < 0)
+				to = 0;
+			else if (to > dur)
+				to = dur;
+			player.seekTo(to, true);
+		}
+	}
+	
+	function playVideo() {
+		if (player) {
 			player.playVideo();
 		}
 	}
-}
-
-function skipVideo(secFromNow) {
-	if (player) {
-		var dur = player.getDuration();
-		var to = secFromNow + player.getCurrentTime();
-		if (to < 0)
-			to = 0;
-		else if (to > dur)
-			to = dur;
-		player.seekTo(to, true);
+	
+	function pauseVideo() {
+		if (player) {
+			player.pauseVideo();
+		}
 	}
-}
-
-function playVideo() {
-	if (player) {
-		player.playVideo();
+	
+	function onytplayerStateChange(newState) {
+		console.log("Player's new state: " + newState);
 	}
-}
-
-function pauseVideo() {
-	if (player) {
-		player.pauseVideo();
+	
+	function onYouTubePlayerReady(playerId) {
+		if (playerId == 'player') {
+			player = document.getElementById('player');
+			player.addEventListener("onStateChange", "onytplayerStateChange");
+			}
 	}
-}
+	
+	function loadVideo(playerUrl, autoplay) {
+		console.log(playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autoplay=' + (autoplay ? 1 : 0));
+		swfobject.embedSWF(
+		playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autohide=1&hd=1&autoplay=' + (autoplay ? 1 : 0),  
+		'player', '640', '505', '9.0.0', false, false,
+		{ allowfullscreen: 'true', allowScriptAccess: 'always'},  // 290 x 250  
+		{ id: "myytplayer" ,wmode: "opaque"}
+		); 
+	} 
+});
 
-function onytplayerStateChange(newState) {
-	console.log("Player's new state: " + newState);
-}
-
-function onYouTubePlayerReady(playerId) {
-	if (playerId == 'player') {
-		player = document.getElementById('player');
-		player.addEventListener("onStateChange", "onytplayerStateChange");
-	}
-}
-
-function loadVideo(playerUrl, autoplay) {
-	console.log(playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autoplay=' + (autoplay ? 1 : 0));
-	swfobject.embedSWF(
-	playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autohide=1&hd=1&autoplay=' + (autoplay ? 1 : 0),  
-	'player', '640', '505', '9.0.0', false, false,
-	{ allowfullscreen: 'true', allowScriptAccess: 'always'}  // 290 x 250  
-	);  
-} 
 
 </script>
 
@@ -290,10 +349,15 @@ div#search {
 	padding: 3px;
 }
 
+#wrapper {
+	z-index: 3999;
+}
+
 #nav-dock {
 	position: fixed;
 	right: 15px;
 	top: 35%;
+	z-index: 1;
 }
 
 #nav-dock a {
@@ -325,7 +389,7 @@ div#grid {
 </head>
 
 <body class="home">
-
+	<div id="wrapper"></div>
 <div id="nav-dock"> 
 	<a id="prev" href="#">&uarr; Prev</a> 
 	<a id="next" href="#">&darr; Next</a>
