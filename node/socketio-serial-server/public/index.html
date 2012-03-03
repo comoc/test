@@ -1,154 +1,356 @@
 <!DOCTYPE html>
+<html>
 <head>
-	<meta charset="utf-8">
+<meta charset="utf-8" />
+<title>YouTube remote</title>
+<!--[if IE]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 
-	<title>socket.io - serial test</title>
-	<meta name="author" content="Akihiro Komori">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="lib/jquery.youtubeplaylist.js"></script>
+<script src="lib/jquery.easing.1.3.js"></script>
+<script src="lib/jquery.vgrid.0.1.7.min.js"></script>
+<script src="lib/jquery.scrollTo-min.js"></script>
 
-	<script src="/socket.io/socket.io.js"></script>	
-	<script>
-		var left = 37;
-		var right = 39;
+<script src="http://swfobject.googlecode.com/svn/trunk/swfobject/swfobject.js"></script>
 
-		$(function() {
-			var host = location.host;
-			var socket = io.connect('http://' + host);
-  			socket.on('from_serial', function (data) {
-				//				$('#log').html(data.my + '<br>');
-				if (data.my.indexOf('DIRL') == 0) {
-					sendKeyEvent(true, right);
-					sendKeyEvent(false, right);
-				} else if (data.my.indexOf('DIRR') == 0) {
-					sendKeyEvent(true, left);
-					sendKeyEvent(false, left);
-				} else if (data.my.indexOf('DIRU') == 0) {
-					if (player) {
-						player.playVideo();
-					}
-				} else if (data.my.indexOf('DIRD') == 0) {
-					if (player) {
-						player.pauseVideo();
-					}
-				}
-				console.log(data.my);
+<script src="/socket.io/socket.io.js"></script>	
+<script>  
+var KEY_ENTER = 13;
+var KEY_LEFT = 37;
+var KEY_UP = 38;
+var KEY_RIGHT = 39;
+var KEY_DOWN = 40;
+var player;
+var AUTOPLAY = true;
+$(function () { 
 
+	var page = 1;
+	var pageSize = 18;  
+
+	
+	$(document).ready(function() {
+//		$("#general").focus();
+	});
+
+	function add_item_to_page(i, item) {
+		if (i == 0)
+			$("#grid-content").empty();
+
+		$("#grid-content").append(item);	
+		console.log(item);
+	}
+
+	function searchVideo(query)  {
+		if (!query)
+			return;
+
+		var time = 'all_time';  
+		var url = 'http://gdata.youtube.com/feeds/api/videos?start-index={page}&max-results={pageSize}&callback=?';  
+		var url2 = url.replace('{page}', page).replace('{pageSize}', pageSize);  
+		var params = {  
+			v: '2',  
+			q: query,
+			alt: 'json-in-script',  // atom, rss, json, json-in-script(jsonp)  
+			format: '5'             // 1-mobile, 5-swf, 6-mobile rtsp  
+		}
+
+		$.getJSON(url2, params, function (data) {  
+			var feed = data.feed;  
+			var entries = feed.entry || [];  
+			$.each(data.feed.entry, function (i, item) {  
+				var vid = item.media$group.yt$videoid.$t;  
+				var title = item.title.$t;  
+				var url = item.content.src;  
+				var thumbnailUrl = item.media$group.media$thumbnail[0].url;  
+				var playerUrl = item.media$group.media$content[0].url;
+				console.log("getJson" + i + ", " + thumbnailUrl);
+				add_item_to_page(
+					i,
+					'<li>'
+					+ '<a href="javascript:loadVideo(\''
+					+ playerUrl + '\' + true)" title="' + title
+					+ '"><img class="my_content" src="' + thumbnailUrl + '" /><br>' + title + '</a>'
+					+ '</li>'
+				);
 			});
 
-			function sendKeyEvent(isPress, keyCode) {
-				if (isPress) {
-					var e = jQuery.Event("keydown");
-					e.which = keyCode;
-					$('#main').trigger(e);
-				}
-				else {
-					var e = jQuery.Event("keydup");
-					e.which = keyCode;
-					$('#main').trigger(e);
-				}
-			}
+			if (entries.length > 0) {
+				$("#grid-content").vgrid();
 
-
+				loadVideo(entries[0].media$group.media$content[0].url, AUTOPLAY);  
+				$('#playerContainer').show();  
+			}  
 		});
-	</script>
-	
-	<script src="imakewebthings-deck.js-227b6b7/modernizr.custom.js"></script>
-
-	<!-- Core and extension CSS files -->
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/core/deck.core.css">
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/goto/deck.goto.css">
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/menu/deck.menu.css">
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/navigation/deck.navigation.css">
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/status/deck.status.css">
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/extensions/hash/deck.hash.css">
-	
-	<!-- Style theme. More available in /themes/style/ or create your own. -->
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/style/neon.css">
-	
-	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
-	<link rel="stylesheet" href="imakewebthings-deck.js-227b6b7/themes/transition/horizontal-slide.css">
+	}
 
 
-	<style type="text/css">
-		p.title {
-			text-align: center;
+	$('#btnSearch').click(function () {  
+		var query = $('#txtQuery').val();
+		searchVideo(query);
+	});
+
+	$('#txtQuery').keydown(function(e) { 
+		if (e.keyCode == KEY_ENTER) {
+			var query = $('#txtQuery').val();
+			if (query)
+				$('#btnSearch').trigger('click');  
 		}
-	</style>
+		console.log(e.keyCode);
+	});
+
+	var host = location.host;
+	var socket = io.connect('http://' + host);
+	socket.on('from_serial', function (data) {
+		//				$('#log').html(data.my + '<br>');
+		if (data.my.indexOf('DIRL') == 0) {
+			sendKeyEvent(true, KEY_RIGHT);
+			sendKeyEvent(false, KEY_RIGHT);
+			skipVideo(-5);
+		} else if (data.my.indexOf('DIRR') == 0) {
+			sendKeyEvent(true, KEY_LEFT);
+			sendKeyEvent(false, KEY_LEFT);
+			skipVideo(5);
+		} else if (data.my.indexOf('DIRU') == 0) {
+//			sendKeyEvent(true, KEY_UP);
+//			sendKeyEvent(false, KEY_UP);
+			//playVideo();
+			scrollDown();
+		} else if (data.my.indexOf('DIRD') == 0) {
+			//pauseVideo();
+//			sendKeyEvent(true, KEY_DOWN);
+//			sendKeyEvent(false, KEY_DOWN);
+			scrollUp();
+		} else if (data.my.indexOf('TAP_') == 0) {
+				playPauseVideo();
+		} else if (data.my.indexOf('SEAR,0,') == 0) {
+			var query = data.my.substring(7);
+			searchVideo(query);
+		}
+		console.log(data.my);
+	
+	});
+
+	$('input').keydown(function(e){
+	    if (e.keyCode == 38) {
+	       $('.my_content').prev().focus();   
+	    }    
+	    if (e.keyCode == 40) {
+	       $('.my_content').next().focus();
+	    }
+	});
+
+	function sendKeyEvent(isPress, keyCode) {
+		if (isPress) {
+			var e = jQuery.Event("keydown");
+			e.which = keyCode;
+			$('body').trigger(e);
+		}
+		else {
+			var e = jQuery.Event("keydup");
+			e.which = keyCode;
+			$('body').trigger(e);
+		}
+	}
+
+	function scrollUp() {
+		scroll('prev');
+	}
+
+	function scrollDown() {
+		scroll('next');
+	}
+
+	// scroll
+    function scroll(direction) {
+
+        var scroll, i,
+                positions = [],
+                here = $(window).scrollTop(),
+                collection = $('.post');
+
+        collection.each(function() {
+            positions.push(parseInt($(this).offset()['top'],10));
+        });
+
+        for(i = 0; i < positions.length; i++) {
+            if (direction == 'next' && positions[i] > here) { scroll = collection.get(i); break; }
+            if (direction == 'prev' && i > 0 && positions[i] >= here) { scroll = collection.get(i-1); break; }
+        }
+
+        if (scroll) {
+            $.scrollTo(scroll, {
+                duration: 750       
+            });
+        }
+
+        return false;
+    }
+
+    $("#next,#prev").click(function() {        
+        return scroll($(this).attr('id'));        
+    });
+
+    $(".scrolltoanchor").click(function() {
+        $.scrollTo($($(this).attr("href")), {
+            duration: 750
+        });
+        return false;
+    });
+
+
+});
+
+function playPauseVideo() {
+	player = document.getElementById('player');
+	if (player) {
+		var s = player.getPlayerState();
+		if (s == 1) {
+			player.pauseVideo();
+		} else if (s == 2 || s == 0) {
+			player.playVideo();
+		}
+	}
+}
+
+function skipVideo(secFromNow) {
+	if (player) {
+		var dur = player.getDuration();
+		var to = secFromNow + player.getCurrentTime();
+		if (to < 0)
+			to = 0;
+		else if (to > dur)
+			to = dur;
+		player.seekTo(to, true);
+	}
+}
+
+function playVideo() {
+	if (player) {
+		player.playVideo();
+	}
+}
+
+function pauseVideo() {
+	if (player) {
+		player.pauseVideo();
+	}
+}
+
+function onytplayerStateChange(newState) {
+	console.log("Player's new state: " + newState);
+}
+
+function onYouTubePlayerReady(playerId) {
+	if (playerId == 'player') {
+		player = document.getElementById('player');
+		player.addEventListener("onStateChange", "onytplayerStateChange");
+	}
+}
+
+function loadVideo(playerUrl, autoplay) {
+	console.log(playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autoplay=' + (autoplay ? 1 : 0));
+	swfobject.embedSWF(
+	playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autohide=1&hd=1&autoplay=' + (autoplay ? 1 : 0),  
+	'player', '640', '505', '9.0.0', false, false,
+	{ allowfullscreen: 'true', allowScriptAccess: 'always'}  // 290 x 250  
+	);  
+} 
+
+</script>
+
+<style type="text/css">
+body {
+	margin: 0;
+	padding: 0;
+	line-height:1.4;
+	color:#333;
+	background-color: #000000;
+	font-family:Arial, sans-serif;
+	font-size:0.9em;
+}
+
+div#search {
+	text-align: right; 
+}
+
+#grid-content {
+	list-style-type: none;
+}
+
+#grid-content li {
+	width: 160px;
+	height: 160px;
+	border: 1px solid #000000;
+	background-color: #101010;
+	color: #FFFFFF;
+	margin: 5px;
+	padding: 3px;
+}
+
+#nav-dock {
+	position: fixed;
+	right: 15px;
+	top: 35%;
+}
+
+#nav-dock a {
+	display: block;
+	padding: 3px 10px;
+	margin: 3px 0;
+	background: #666;
+	color: #fff;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+	-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+}
+#nav-dock a:hover {
+	background: #000;
+}
+#nav-dock #next {
+	margin-bottom: 10px;
+}
+
+div#playerContainer {
+	text-align: center;
+}
+div#grid {
+	text-align: center;
+}
+</style>
+
 </head>
 
-<body class="deck-container" id="main">
-	<section class="slide" id="title-slide">
-	<div id="ytplayer"></div>
-	<script>
-	  // @see https://developers.google.com/youtube/js_api_reference
-	  // @see https://developers.google.com/youtube/iframe_api_reference
-      var tag = document.createElement('script');
-      tag.src = "http://www.youtube.com/player_api";
-      var firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      var player;
-      function onYouTubePlayerAPIReady() {
-        player = new YT.Player('ytplayer', {
-          height: '480',
-          width: '853',
-          videoId: 't3TmFyyB4zI',
-        });
-      }
-	</script>
-	<p class='title'>Video 1</p>
-</section>
-<section class="slide" id="slide-2">
-	<iframe width="853" height="480" src="http://www.youtube.com/embed/B4PRBIXkMUc?enablejsapi=1&playerapiid=ytplayer2" frameborder="0" allowfullscreen></iframe>
-	<p class='title'>Video 2</p>
-</section>
-<section class="slide" id="slide-3">
-	<iframe width="853" height="480" src="http://www.youtube.com/embed/wsGVYFBxY88?enablejsapi=1&playerapiid=ytplayer3" frameborder="0" allowfullscreen></iframe>
-	<p class='title'>Video 3</p>
-</section>
+<body class="home">
 
-
-<!-- deck.navigation snippet -->
-<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
-<a href="#" class="deck-next-link" title="Next">&#8594;</a>
-
-<!-- deck.status snippet -->
-<p class="deck-status">
-	<span class="deck-status-current"></span>
-	/
-	<span class="deck-status-total"></span>
-</p>
-
-<!-- deck.goto snippet -->
-<form action="." method="get" class="goto-form">
-	<label for="goto-slide">Go to slide:</label>
-	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
-	<datalist id="goto-datalist"></datalist>
-	<input type="submit" value="Go">
-</form>
-
-<!-- deck.hash snippet -->
-<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
-
-
-<!-- Grab CDN jQuery, with a protocol relative URL; fall back to local if offline -->
-<script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
-<script>window.jQuery || document.write('<script src="../jquery-1.7.min.js"><\/script>')</script>
-
-<!-- Deck Core and extensions -->
-<script src="imakewebthings-deck.js-227b6b7/core/deck.core.js"></script>
-<script src="imakewebthings-deck.js-227b6b7/extensions/hash/deck.hash.js"></script>
-<script src="imakewebthings-deck.js-227b6b7/extensions/menu/deck.menu.js"></script>
-<script src="imakewebthings-deck.js-227b6b7/extensions/goto/deck.goto.js"></script>
-<script src="imakewebthings-deck.js-227b6b7/extensions/status/deck.status.js"></script>
-<script src="imakewebthings-deck.js-227b6b7/extensions/navigation/deck.navigation.js"></script>
-
-<!-- Initialize the deck -->
-<script>
-$(function() {
-	$.deck('.slide');
-});
-</script>
+<div id="nav-dock"> 
+	<a id="prev" href="#">&uarr; Prev</a> 
+	<a id="next" href="#">&darr; Next</a>
+<!--
+	<a href="#comments" class="scrolltoanchor">Comments</a> 
+	<a href="#reply" class="scrolltoanchor">Reply</a> 
+-->
 </div>
+
+	<div class="post">
+		<div id="search">
+			<input id="txtQuery" type="text" value="" />      
+			<button id="btnSearch">Search!</button>    
+		</div>
+	</div>
+	<div class="post">
+		<div id="playerContainer">  
+		  	<object id="player"></object>
+		</div>           
+	</div>
+	<div class="post">
+		<div id="grid">
+			<ul id="grid-content"></ul>
+		</div>
+	</div>
 </body>
 </html>
+
