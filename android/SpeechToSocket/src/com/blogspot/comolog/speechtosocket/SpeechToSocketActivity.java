@@ -277,10 +277,7 @@ public class SpeechToSocketActivity extends Activity {
     private OnTouchListener mTouchListener = new OnTouchListener() {
 
 		public boolean onTouch(View v, MotionEvent event) {
-			if (!mGestureDetector.onTouchEvent(event)) {
-				mChat.sendMessage(TAG_TOUCH + "," + (int)event.getX() + "," + (int)event.getX() + "\n");
-			}
-			return true;
+			return mGestureDetector.onTouchEvent(event);
 		}
     	
     };
@@ -305,21 +302,25 @@ public class SpeechToSocketActivity extends Activity {
 				if (velocityX > TORELANCE) {
 					// right
 					mChat.sendMessage(TAG_DIRECTION_RIGHT + "\n");
+					return true;
 				} else if (velocityX < -TORELANCE) {
 					// left
 					mChat.sendMessage(TAG_DIRECTION_LEFT + "\n");
+					return true;
 				}
 			} else if (avy - avx > TORELANCE) {
 				if (velocityY > TORELANCE) {
 					// down
 					mChat.sendMessage(TAG_DIRECTION_DOWN + "\n");
+					return true;
 				} else if (velocityY < -TORELANCE) {
 					// up
 					mChat.sendMessage(TAG_DIRECTION_UP + "\n");
+					return true;
 				}				
 			}
 			
-			return true;
+			return false;
 		}
 
 		public void onLongPress(MotionEvent e) {
@@ -328,9 +329,10 @@ public class SpeechToSocketActivity extends Activity {
 
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
-//			Log.v(TAG, "distanceX:" + distanceX);
-//			Log.v(TAG, "distanceY:" + distanceY);
-			return false;
+			Log.v(TAG, "distanceX:" + distanceX + " distanceY:" + distanceY);
+			mChat.sendMessage(TAG_TOUCH + "," + (int)distanceX + "," + (int)distanceY + "\n");
+
+			return true;
 		}
 
 		public void onShowPress(MotionEvent e) {
