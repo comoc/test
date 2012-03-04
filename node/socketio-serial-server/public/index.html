@@ -23,8 +23,8 @@ var KEY_LEFT = 37;
 var KEY_UP = 38;
 var KEY_RIGHT = 39;
 var KEY_DOWN = 40;
-var player;
 var AUTOPLAY = true;
+var player;
 $(function () { 
 
     var page = 1;
@@ -36,6 +36,17 @@ $(function () {
 //      $("#general").focus();
 //      createCursor();
     });
+
+
+	$('a[href=#]').click(function(){
+		return false;
+	});
+
+	$('#plitem').click(function () {
+		var param = $(this).data('data-url');
+		console.log("param: " + param);
+//		loadVideo(param, AUTOPLAY);
+	});
 
 //  function createCursor() {
 //      cursor = $('#cursor');
@@ -88,11 +99,7 @@ $(function () {
             $("#grid-content").empty();
 
         $("#grid-content").append(item);    
-        console.log(item);
-	}
-
-	function goToPrev() {
-		$('.my_content').prev().focus();
+//        console.log(item);
 	}
 
     function searchVideo(query)  {
@@ -120,7 +127,9 @@ $(function () {
                 var playerUrl = item.media$group.media$content[0].url;
                 console.log("getJson" + i + ", " + thumbnailUrl);
 
-                var scrpt = '<a href="javascript:loadVideo(\'';
+				var scrpt = '';
+
+				scrpt += '<a href="javascript:loadVideo(\'';
                 scrpt += playerUrl;
                 scrpt += '\',' + AUTOPLAY + ');"';
                 scrpt += ' title="' + title;
@@ -128,14 +137,22 @@ $(function () {
                         + thumbnailUrl
                         + '" /><br>'
                         + title
-                    + '</a>';
+						+ '</a>';
+
+//				scrpt += '<a id="plitem" href="#" data-url="' + playerUrl + '" title="' + title + '">'
+//					+ '<img class="my_content" src="' + thumbnailUrl + '" /><br />'
+//					+ title
+//					+ '</a>';
+
                 console.log("script: " + scrpt);
                 addItemToGridContent(
                     i,
                     '<li>'
                     + scrpt
                     + '</li>'
-                );
+					);
+
+
             });
 
             if (entries.length > 0) {
@@ -315,8 +332,8 @@ $(function () {
     function onYouTubePlayerReady(playerId) {
         if (playerId == 'player') {
             player = document.getElementById('player');
-            player.addEventListener("onStateChange", "onytplayerStateChange");
-            }
+			player.addEventListener("onStateChange", "onytplayerStateChange");
+        }
     }
     
 });
@@ -328,11 +345,13 @@ function loadVideo(playerUrl, autoplay) {
         url,
         'player', '640', '505', '9.0.0', false, false,
         { allowfullscreen: 'true', allowScriptAccess: 'always'}  // 290 x 250  
-//        ,{ id: 'myytplayer', wmode: 'opaque'}
-    ); 
-//	$(function () { 
-//		goToPrev(); 
-//	});
+	);
+
+	// any idea ?
+	//$(function () {
+//	JQuery.scrollUp();
+	//});
+
 } 
 
 
