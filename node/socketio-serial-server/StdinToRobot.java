@@ -39,8 +39,15 @@ class StdinToRobot {
 					System.out.println(StdinToRobot.class.getName() + "TAP");
 					robot.mousePress(InputEvent.BUTTON1_MASK);
 					robot.mouseRelease(InputEvent.BUTTON1_MASK);
+//				} else if (s.indexOf("DIRU") == 0) {
+//					robot.keyPress(KeyEvent.VK_PAGE_DOWN);
+//					robot.keyRelease(KeyEvent.VK_PAGE_DOWN);
+//					robot.mouseWheel(5);
+//        		} else if (s.indexOf("DIRD") == 0) {
+//					robot.keyPress(KeyEvent.VK_PAGE_UP);
+//					robot.keyRelease(KeyEvent.VK_PAGE_UP);
+//					robot.mouseWheel(-5);
 				}
-
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
