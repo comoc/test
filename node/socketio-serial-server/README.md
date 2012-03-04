@@ -7,7 +7,7 @@
 
 毎回
 ----
-node app.js
+node app.js | java StdinToRobot
 
 ブラウザで、'http://[ホスト名]:8001/' を開く
 
