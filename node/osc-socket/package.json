@@ -1,0 +1,13 @@
+{
+    "name": "osc-socket"
+  , "version": "0.0.1"
+  , "private": true
+  , "dependencies": {
+      "express": "2.5.8"
+    , "jade": ">= 0.0.1"
+	, "socket.io": ">= 0.9.1"
+	, "serialport": ">= 0.3.0"
+	, "osc4node": ""
+	, "jspack": ""
+  }
+}
