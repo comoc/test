@@ -25,15 +25,26 @@ class StdinToRobot {
 				if (s.indexOf("TOUC") == 0) {
 					String[] stars = s.split(",");
 					if (stars.length >= 3) {
-						int dx = Integer.parseInt(stars[1]);
-						int dy = Integer.parseInt(stars[2]);
 
 						PointerInfo a = MouseInfo.getPointerInfo();
-						Point b  = a.getLocation();
-						int x = (int)b.getX() - dx;
-						int y = (int)b.getY() - dy;
-						System.out.println(StdinToRobot.class.getName() + "MOVE x:"+ x + " y:" + y);
-						robot.mouseMove(x, y);
+						if (a != null) {
+							Point b  = a.getLocation();
+							int dx = Integer.parseInt(stars[1]);
+							int dy = Integer.parseInt(stars[2]);
+							int x = (int)b.getX() - dx;
+							int y = (int)b.getY() - dy;
+							if (x < 0)
+								x = 0;
+							else if (x >= 4096)
+								x = 4095;
+							if (y < 0)
+								y = 0;
+							else if (y >= 4096)
+								y = 4095;
+
+							System.out.println(StdinToRobot.class.getName() + "MOVE x:"+ x + " y:" + y);
+							robot.mouseMove(x, y);
+						}
 					}
 				} else if (s.indexOf("TAP_") == 0) {
 					System.out.println(StdinToRobot.class.getName() + "TAP");

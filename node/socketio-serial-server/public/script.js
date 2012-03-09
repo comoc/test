@@ -39,7 +39,7 @@ $(function () {
         if (!query)
             return;
 
-        var time = 'all_time';  
+        var time = 'all_time';
         var url = 'http://gdata.youtube.com/feeds/api/videos?start-index={page}&max-results={pageSize}&callback=?';  
         var url2 = url.replace('{page}', page).replace('{pageSize}', pageSize);  
         var params = {  
@@ -49,7 +49,13 @@ $(function () {
             format: '5'             // 1-mobile, 5-swf, 6-mobile rtsp  
         }
 
-        $.getJSON(url2, params, function (data) {  
+        $.getJSON(url2, params, function (data) {
+			console.log('getJSON');
+			if (!data) {
+				console.log('getJSON data is null');
+				return;
+			}
+
             var feed = data.feed;  
             var entries = feed.entry || [];  
             $.each(data.feed.entry, function (i, item) {  
@@ -77,7 +83,7 @@ $(function () {
 //					+ title
 //					+ '</a>';
 
-                console.log("script: " + scrpt);
+                console.log('script: ' + scrpt);
                 addItemToGridContent(
                     i,
                     '<li>'
@@ -88,13 +94,13 @@ $(function () {
 
             });
 
-            if (entries.length > 0) {
+            if (entries && entries.length > 0) {
                 $("#grid-content").vgrid();
 
                 loadVideo(entries[0].media$group.media$content[0].url, AUTOPLAY);  
                 $('#playerContainer').show();  
-            }  
-        });
+            }
+		});
     }
 
 
@@ -118,21 +124,21 @@ $(function () {
         if (data.my.indexOf('DIRL') == 0) {
 //            sendKeyEvent(true, KEY_RIGHT);
 //            sendKeyEvent(false, KEY_RIGHT);
-            skipVideo(-5);
+//            skipVideo(-5);
         } else if (data.my.indexOf('DIRR') == 0) {
 //            sendKeyEvent(true, KEY_LEFT);
 //            sendKeyEvent(false, KEY_LEFT);
-            skipVideo(5);
+//            skipVideo(5);
         } else if (data.my.indexOf('DIRU') == 0) {
 //          sendKeyEvent(true, KEY_UP);
 //          sendKeyEvent(false, KEY_UP);
             //playVideo();
-            scrollDown();
+//            scrollDown();
         } else if (data.my.indexOf('DIRD') == 0) {
             //pauseVideo();
 //          sendKeyEvent(true, KEY_DOWN);
 //          sendKeyEvent(false, KEY_DOWN);
-            scrollUp();
+//            scrollUp();
 //      } else if (data.my.indexOf('TAP_') == 0) {
 //              playPauseVideo();
         } else if (data.my.indexOf('SEAR,0,') == 0) {
@@ -224,6 +230,7 @@ $(function () {
     }
     
     function skipVideo(secFromNow) {
+        player = document.getElementById('player');
         if (player) {
             var dur = player.getDuration();
             var to = secFromNow + player.getCurrentTime();
@@ -314,7 +321,7 @@ function getScrollPosition() {
 }
 
 function loadVideo(playerUrl, autoplay) {
-    var url = playerUrl + '&enablejsapi=1&playerapiid=player&rel=1&border=0&fs=1&autohide=1&hd=1&autoplay=' + (autoplay ? 1 : 0);
+    var url = playerUrl + '&enablejsapi=1&playerapiid=player&rel=0&border=0&fs=1&autohide=1&hd=1&autoplay=' + (autoplay ? 1 : 0);
     console.log("loadVideo:" + url);
     swfobject.embedSWF(
         url,

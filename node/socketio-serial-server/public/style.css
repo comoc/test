@@ -1,4 +1,8 @@
+html {
+	height: 100%;
+}
 body {
+	height: 100%;
     margin: 0;
     padding: 0;
     line-height:1.4;
@@ -8,12 +12,28 @@ body {
     font-size:0.9em;
 }
 
+.post {
+	height: 100%;
+}
+
 a:link { color: #a0a0a0; }
 a:visited { color: #101010; }
 a:hover { color: #ffffff; }
 a:active { color: #0000ff; }
 
+/*
+div#playerContainer {
+	z-index: 1;
+    position: fixed;
+    text-align: center;
+	left: 50%;
+	width: 1000px;
+	margin-left: -500px;
+}
+*/
+
 div#search {
+    top: 0.5em;
     text-align: right; 
 }
 
@@ -22,7 +42,7 @@ div#search {
 }
 
 #grid-content li {
-    width: 160px;
+    width: 150px;
     height: 160px;
     border: 1px solid #000000;
     background-color: #101010;
@@ -41,7 +61,7 @@ div#search {
     position: fixed;
     right: 15px;
     top: 35%;
-    z-index: 1;
+    z-index: 3;
 }
 
 #nav-dock a {
