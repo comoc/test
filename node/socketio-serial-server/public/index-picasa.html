@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Picasa remote</title>
+<!--[if IE]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
+<script src="lib/jquery.easing.1.3.js"></script>
+<script src="lib/jquery.vgrid.0.1.7.min.js"></script>
+<script src="lib/jquery.scrollTo-min.js"></script>
+
+<script src="/socket.io/socket.io.js"></script> 
+<script src="script-picasa.js"></script>
+
+<link rel="stylesheet" href="style-picasa.css">
+</head>
+
+<body class="home">
+    <!--    <div id="wrapper"></div> -->
+    <div id="nav-dock"> 
+        <a id="prev" href="#">&uarr; Prev</a> 
+        <a id="next" href="#">&darr; Next</a>
+    <!--
+        <a href="#comments" class="scrolltoanchor">Comments</a> 
+        <a href="#reply" class="scrolltoanchor">Reply</a> 
+    -->
+    </div>
+    <div id="search">
+        <input id="txtQuery" type="text" value="" />      
+        <button id="btnSearch">Search!</button>    
+    </div>
+
+    <div class="post">
+        <div id="grid">
+            <ul id="grid-content"></ul>
+        </div>
+    </div>
+</body>
+</html>
+
