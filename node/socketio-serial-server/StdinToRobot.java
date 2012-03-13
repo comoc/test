@@ -4,6 +4,28 @@ import java.io.*;
 
 class StdinToRobot {
 
+	public static boolean isInBounds(int x, int y) {
+
+//		Rectangle virtualBounds = new Rectangle();
+		GraphicsEnvironment ge = GraphicsEnvironment.
+			getLocalGraphicsEnvironment();
+		GraphicsDevice[] gs =
+			ge.getScreenDevices();
+		for (int j = 0; j < gs.length; j++) { 
+			GraphicsDevice gd = gs[j];
+			GraphicsConfiguration[] gc =
+				gd.getConfigurations();
+			for (int i=0; i < gc.length; i++) {
+				if (gc[i].getBounds().contains(x, y))
+					return true;
+//				virtualBounds =
+//					virtualBounds.union(gc[i].getBounds());
+			}
+		}
+
+		return false;	
+	}
+
 	public static void main(String[] args) {
 		Robot robot;
 		try {
@@ -33,17 +55,18 @@ class StdinToRobot {
 							int dy = Integer.parseInt(stars[2]);
 							int x = (int)b.getX() - dx;
 							int y = (int)b.getY() - dy;
-							if (x < 0)
-								x = 0;
-							else if (x >= 4096)
-								x = 4095;
-							if (y < 0)
-								y = 0;
-							else if (y >= 4096)
-								y = 4095;
-
+//							if (x < 0)
+//								x = 0;
+//							else if (x >= 4096)
+//								x = 4095;
+//							if (y < 0)
+//								y = 0;
+//							else if (y >= 4096)
+//								y = 4095;
 							System.out.println(StdinToRobot.class.getName() + "MOVE x:"+ x + " y:" + y);
-							robot.mouseMove(x, y);
+							if (isInBounds(x, y)) {
+								robot.mouseMove(x, y);
+							}
 						}
 					}
 				} else if (s.indexOf("TAP_") == 0) {

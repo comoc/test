@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Pinterest remote</title>
+<!--[if IE]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
+<script src="lib/jquery.easing.1.3.js"></script>
+<script src="lib/jquery.vgrid.0.1.7.min.js"></script>
+<script src="lib/jquery.scrollTo-min.js"></script>
+<script src="lib/jquery.spinner.js"></script>
+
+<script src="/socket.io/socket.io.js"></script> 
+<script>
+$(function() {
+
+	$(document).ready(function() {
+//		var url = 'http://pinterest.com/';
+//		$('iframe#pinterest').attr('src', url);
+	});
+
+	function searchPinterest(query) {
+		var opts = { position: 'center', hide: true };
+		$('#spinner').spinner(opts);
+		
+		var url = 'http://pinterest.com/search?q=' + encodeURIComponent(query);
+		$('iframe#pinterest').attr('src', url);
+		
+		$('#spinner').spinner('remove');
+	}
+
+	var host = location.host;
+	console.log(host);
+	var socket = io.connect('http://' + host);
+	socket.on('from_serial', function (data) {
+		if (data.my.indexOf('DIRL') == 0) {
+		} else if (data.my.indexOf('DIRR') == 0) {
+		} else if (data.my.indexOf('DIRU') == 0) {
+		} else if (data.my.indexOf('DIRD') == 0) {
+		} else if (data.my.indexOf('SEAR,0,') == 0) {
+			var query = data.my.substring(7);
+			searchPinterest(query);
+		}
+		console.log(data.my);
+	});
+
+	$('input').keydown(function(e){
+		if (e.keyCode == 38) {
+			$('.my_content').prev().focus();   
+		}    
+		if (e.keyCode == 40) {
+			$('.my_content').next().focus();
+		}
+	});
+
+});
+</script>
+
+<link rel="stylesheet" href="style_scrollbar.css">
+<style>
+iframe#pinterest {
+    width: 99%;
+    height: 99%;
+    position:absolute;
+	bottom:0px;
+	border:none;
+	border-width:0px;
+	margin:0px;
+	padding: 0px;
+}
+
+body {
+	background: #000000;
+}
+</style>
+</head>
+
+<body class="home">
+
+	<div class="content">
+		<div id="spinner"></div>
+		<iframe id='pinterest' src=""></iframe>
+	</div>
+</body>
+</html>
+

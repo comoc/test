@@ -35,8 +35,10 @@ $(function () {
 	function searchPhoto(query)  {
 		if (!query)
 			return;
+		var opts = { position: 'center', hide: true };
+		$('#spinner').spinner(opts);
 
-		var perpage = 20;
+		var perpage = 20 + 20; // for 1920x1080
 
 		$.ajax({
 			url:"http://picasaweb.google.com/data/feed/base/all?alt=json-in-script&kind=photo&q="+query+"&filter=1&access=public&max-results="+perpage+"&imgmax=300",
@@ -58,14 +60,15 @@ $(function () {
 				}
 
 //        		setTimeout(function() {
+			
 
 					$("#grid-content").vgrid();
 //				}, 2000);
+			},
+			complete:function(xhr, status, err){
+				$('#spinner').spinner('remove');
 			}
-
 		});
-
-
 	}
 
 
@@ -84,6 +87,7 @@ $(function () {
 	});
 
 	var host = location.host;
+	console.log(host);
 	var socket = io.connect('http://' + host);
 	socket.on('from_serial', function (data) {
 		if (data.my.indexOf('DIRL') == 0) {
@@ -180,6 +184,8 @@ $(function () {
 		});
 		return false;
 	});
+
+
 
 });
 

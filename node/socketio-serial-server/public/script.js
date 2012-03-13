@@ -5,6 +5,10 @@ var KEY_RIGHT = 39;
 var KEY_DOWN = 40;
 var AUTOPLAY = true;
 var player;
+
+var winWidth = 640;
+var winHeight = 480;
+
 $(function () { 
 
     var page = 1;
@@ -15,8 +19,31 @@ $(function () {
     $(document).ready(function() {
 //      $("#general").focus();
 //      createCursor();
+		setSize();
+  		$('#nav-dock').hide(500);
+		$('body').css('cursor', 'none');
     });
 
+	$(window).resize(function(){
+		setSize();
+	});
+	
+
+	$(document).mousemove(function(e){
+		if ($('#nav-dock').is(":hidden")) {
+	  		$('#nav-dock').show(200);
+			$('body').css('cursor', 'auto');
+			setTimeout(function() {
+				$('body').css('cursor', 'none');
+	  			$('#nav-dock').hide(500);
+			}, 5000);
+		}
+	});
+
+	function setSize() {
+		winWidth = $(window).width();
+		winHeight = $(window).height();
+	}
 
 	$('a[href=#]').click(function(){
 		return false;
@@ -38,6 +65,9 @@ $(function () {
     function searchVideo(query)  {
         if (!query)
             return;
+
+		var opts = { position: 'center', hide: true };
+		$('#spinner').spinner(opts);
 
         var time = 'all_time';
         var url = 'http://gdata.youtube.com/feeds/api/videos?start-index={page}&max-results={pageSize}&callback=?';  
@@ -100,6 +130,9 @@ $(function () {
                 loadVideo(entries[0].media$group.media$content[0].url, AUTOPLAY);  
                 $('#playerContainer').show();  
             }
+
+			$('#spinner').spinner('remove');
+
 		});
     }
 
@@ -243,12 +276,14 @@ $(function () {
     }
     
     function playVideo() {
+        player = document.getElementById('player');
         if (player) {
             player.playVideo();
         }
     }
     
     function pauseVideo() {
+        player = document.getElementById('player');
         if (player) {
             player.pauseVideo();
         }
@@ -325,8 +360,13 @@ function loadVideo(playerUrl, autoplay) {
     console.log("loadVideo:" + url);
     swfobject.embedSWF(
         url,
-        'player', '640', '505', '9.0.0', false, false,
-        { allowfullscreen: 'true', allowScriptAccess: 'always'}  // 290 x 250  
+        'player',
+		//'640',
+		//'505',
+		'' + winWidth,
+		'' + winHeight,
+		'9.0.0', false, false,
+        { allowfullscreen: 'true', allowScriptAccess: 'always', wmode: 'transparent'}  // 290 x 250  
 	);
 
 	scrollTo(0,0);

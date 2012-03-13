@@ -17,8 +17,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 public class SpeechToSocketActivity extends Activity {
@@ -55,6 +57,9 @@ public class SpeechToSocketActivity extends Activity {
 		
 		View view = findViewById(R.id.viewTouch);
 		view.setOnTouchListener(mTouchListener);
+		
+		ListView listView = (ListView) findViewById(R.id.listResults);
+		listView.setOnItemClickListener(mItemClickListener);
 	}
 
 	@Override
@@ -96,14 +101,17 @@ public class SpeechToSocketActivity extends Activity {
 				String resultsString = "";
 				List<String> results = data
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+				ArrayAdapter<String> aa = new ArrayAdapter<String>(this,
+						R.layout.list_item);
+				ListView listView = (ListView) findViewById(R.id.listResults);
+				listView.setAdapter(aa);
+				aa.clear();
 				for (int i = 0; i < results.size(); i++) {
 					String res = results.get(i);
-					mChat.sendMessage(TAG_SEARCH + "," + i + "," + res + "\n");
-					resultsString += res + "\n";
+					aa.add(res);
+//					resultsString += res + "\n";
 				}
-				TextView edit = (TextView) findViewById(R.id.editTextResults);
-				edit.clearComposingText();
-				edit.setText(resultsString);
+//				edit.setText(resultsString);
 			}
 			break;
         case REQUEST_CONNECT_DEVICE_SECURE:
@@ -351,5 +359,18 @@ public class SpeechToSocketActivity extends Activity {
 
     	
     });
+    
+    private AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
+
+		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+				long arg3) {
+			ListView listView = (ListView)arg0;
+			String item = (String) listView.getItemAtPosition(arg2);
+//			mChat.sendMessage(TAG_SEARCH + "," + i + "," + res + "\n");	
+			mChat.sendMessage(TAG_SEARCH + "," + 0 + "," + item + "\n");	
+			Log.v(TAG, "onItemClick : " + item);
+		}
+    	
+    };
     
 }

@@ -88,3 +88,13 @@ div#playerContainer {
 div#grid {
     text-align: center;
 }
+
+div#spinner {  
+    width: 10px;  
+    height: 10px;  
+    position: absolute;  
+    top: 50%;  
+    left: 50%;  
+    margin: -5px 0 0 -5px;  
+}
+

@@ -1,7 +1,7 @@
 // http://www.sojamo.de/libraries/oscP5/reference/index.html
 import oscP5.*;
 import netP5.*;
-  
+
 OscP5 oscP5;
 NetAddress myRemoteLocation;
 

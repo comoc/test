@@ -4,7 +4,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	android:keepScreenOn="true">
+	android:keepScreenOn="true" android:scrollbars="vertical" android:scrollbarSize="10dip" android:scrollbarStyle="outsideInset" android:scrollbarAlwaysDrawVerticalTrack="true">
  <!--
 <android.gesture.GestureOverlayView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -41,21 +41,18 @@
 
 			</LinearLayout>
 
-			<EditText android:id="@+id/editTextResults"
-				android:layout_width="match_parent" android:layout_height="wrap_content"
-				android:inputType="textMultiLine"
-				android:gravity="top|left" android:focusable="false"
-				android:focusableInTouchMode="false" android:lines="5">
-
+			<ListView android:id="@+id/listResults"
+				android:layout_width="match_parent" android:layout_height="20mm"
+				android:gravity="top|left" android:background="#000080" android:scrollbarAlwaysDrawVerticalTrack="true" android:scrollbars="vertical" android:scrollbarStyle="insideInset" android:fadeScrollbars="false" android:cacheColorHint="#00000000">
 <!--
  				<requestFocus />
  -->
-			</EditText>
+			</ListView>
 
 			<LinearLayout android:id="@+id/linearLayout1"
 				android:layout_width="match_parent" android:layout_height="wrap_content">
 			</LinearLayout>
-			<View android:layout_height="match_parent" android:layout_width="match_parent" android:background="#808080" android:id="@+id/viewTouch"></View>
+			<View android:layout_height="match_parent" android:layout_width="match_parent" android:background="@drawable/nashiji" android:id="@+id/viewTouch"></View>
 
 
 		</LinearLayout>
