@@ -26,7 +26,7 @@
  */
 
 /*
- * This GLSL version is created by Akihiro Komori <akomori@jp.sony.com>
+ * This GLSL version is created by Akihiro Komori
  * Date: Jun. 17 2011
  */
 #ifdef GL_ARB_texture_rectangle

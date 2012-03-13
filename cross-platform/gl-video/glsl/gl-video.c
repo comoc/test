@@ -26,7 +26,7 @@
  */
 
 /*
- This GLSL version is created by Akihiro Komori <akomori@jp.sony.com>
+ This GLSL version is created by Akihiro Komori
 */
 
 #ifndef GL_GLEXT_PROTOTYPES
