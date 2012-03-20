@@ -101,7 +101,7 @@ public class SpeechToSocketActivity extends Activity {
 				List<String> results = data
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 				ArrayAdapter<String> aa = new ArrayAdapter<String>(this,
-						android.R.layout.simple_list_item_1);
+						R.layout.list_item);
 				ListView listView = (ListView) findViewById(R.id.listResults);
 				listView.setAdapter(aa);
 				aa.clear();
