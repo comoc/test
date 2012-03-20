@@ -293,31 +293,28 @@ td { vertical-align: top; }
 
 /* FADE THROUGH */
 #transitions {
-  width: 300px;
-  height: 200px;
-  margin: 150px auto 0;
+  width: 600px;
+  height: 400px;
+  margin: 50px auto 0;
 }
 #fadethrough div {
-  width: 300px;
-  height: 200px;
+  width: 600px;
+  height: 400px;
   position: absolute;
 }
 #fadethrough .incoming {
-  z-index: 10;
-}
-#fadethrough .outgoing {
   -webkit-animation-iteration-count: 1;
-  -webkit-animation-duration: 3s;
+  -webkit-animation-duration: 2s;
+  /*-webkit-animation-name: fadethrough;*/	
   -webkit-transform: scale(1) translate(0,0);
   -webkit-transform-origin: 50% 50%;
   z-index: 20;
+  opacity: 0;
 }
-#fadethrough.active .outgoing {
-  -webkit-animation-name: fadethrough;  
+#fadethrough .outgoing {
+  z-index: 10;
 }
 @-webkit-keyframes fadethrough {
   0% { -webkit-transform: scale(1.5) translate(0,0); opacity: 0; -webkit-animation-timing-function: linear; }
-  50% { -webkit-transform: scale(1.5) translate(0,0); opacity: 0; }
-  75% { -webkit-transform: scale(1.25) translate(0,0); opacity: 0.5; }
   100% { -webkit-transform: scale(1) translate(0,0); opacity: 1; }
 }
