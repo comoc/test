@@ -98,20 +98,17 @@ public class SpeechToSocketActivity extends Activity {
 		switch (requestCode) {
 		case REQUEST_CODE:
 			if (resultCode == RESULT_OK) {
-				String resultsString = "";
 				List<String> results = data
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 				ArrayAdapter<String> aa = new ArrayAdapter<String>(this,
-						R.layout.list_item);
+						android.R.layout.simple_list_item_1);
 				ListView listView = (ListView) findViewById(R.id.listResults);
 				listView.setAdapter(aa);
 				aa.clear();
 				for (int i = 0; i < results.size(); i++) {
 					String res = results.get(i);
 					aa.add(res);
-//					resultsString += res + "\n";
 				}
-//				edit.setText(resultsString);
 			}
 			break;
         case REQUEST_CONNECT_DEVICE_SECURE:
