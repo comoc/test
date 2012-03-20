@@ -302,15 +302,21 @@ td { vertical-align: top; }
   height: 400px;
   position: absolute;
 }
+
 #fadethrough .incoming {
   -webkit-animation-iteration-count: 1;
   -webkit-animation-duration: 2s;
-  /*-webkit-animation-name: fadethrough;*/	
   -webkit-transform: scale(1) translate(0,0);
   -webkit-transform-origin: 50% 50%;
   z-index: 20;
   opacity: 0;
 }
+
+#fadethrough .incoming.active {
+  -webkit-animation-name: fadethrough;	
+  opacity: 1;
+}
+
 #fadethrough .outgoing {
   z-index: 10;
 }
