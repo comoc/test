@@ -29,6 +29,8 @@ public class SpeechToSocketActivity extends Activity {
 	private static final int REQUEST_CODE = 0;
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
 
+    private static final String TAG_BEGIN_SEARCH = "BGNS";
+    private static final String TAG_END_SEARCH = "ENDS";
     private static final String TAG_SEARCH = "SEAR";
     private static final String TAG_DIRECTION_UP = "DIRU";
     private static final String TAG_DIRECTION_DOWN = "DIRD";
@@ -108,8 +110,10 @@ public class SpeechToSocketActivity extends Activity {
 				for (int i = 0; i < results.size(); i++) {
 					String res = results.get(i);
 					aa.add(res);
+					mChat.sendMessage(TAG_SEARCH + "," + i + "," + res + "\n");	
 				}
 			}
+			mChat.sendMessage(TAG_END_SEARCH + "\n");
 			break;
         case REQUEST_CONNECT_DEVICE_SECURE:
             // When DeviceListActivity returns with a device to connect
@@ -240,6 +244,8 @@ public class SpeechToSocketActivity extends Activity {
 	
 	private void startSR(boolean isFree) {
 
+		
+
 		try {
 			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 			if (isFree)
@@ -249,6 +255,7 @@ public class SpeechToSocketActivity extends Activity {
 				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 						RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
 			startActivityForResult(intent, REQUEST_CODE);
+			mChat.sendMessage(TAG_BEGIN_SEARCH + "\n");
 		} catch (ActivityNotFoundException e) {
 			Toast.makeText(SpeechToSocketActivity.this, e.toString(),
 					Toast.LENGTH_SHORT).show();

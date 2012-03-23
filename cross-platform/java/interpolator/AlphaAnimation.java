@@ -27,6 +27,7 @@ class AlphaAnimation {
 	}
 	
 	public void startFromCurrentValue(int alphaTo, long duration, long time) {
+		mAlphaFrom = mAlpha;
 		mAlphaTo = clamp(alphaTo);
 		mInterpolator.setInterval(duration);
 		mInterpolator.start(time);

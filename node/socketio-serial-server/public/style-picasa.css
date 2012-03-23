@@ -51,6 +51,22 @@ div#search {
     padding: 3px;
 }
 
+div.thumb-div {
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-name: fadethrough;
+  -webkit-animation-duration: 2s;
+  -webkit-transform: scale(1);
+  -webkit-transform-origin: 50% 50%;
+  opacity: 1;
+}
+
+@-webkit-keyframes fadethrough {
+  0% { -webkit-transform: scale(2); opacity: 0; -webkit-animation-timing-function: ease-in-out; }
+  100% { -webkit-transform: scale(1); opacity: 1; }
+}
+
+
+
 img.thumb {
 	max-width: 170px;
 	max-height: 170px;
@@ -67,7 +83,7 @@ img.thumb {
     position: fixed;
     right: 15px;
     top: 35%;
-    z-index: 3;
+    z-index: 100;
 }
 
 #nav-dock a {
@@ -105,4 +121,6 @@ div#spinner {
     top: 50%;  
     left: 50%;  
     margin: -5px 0 0 -5px;  
+  	z-index: 10;
 }
+
