@@ -8,7 +8,7 @@ var SerialPort = serialport.SerialPort; // localize object constructor
 var active = true;
 var sock = null;
 
-var sp = new SerialPort('/dev/tty.NexusOne-SpeechServer', { 
+var sp = new SerialPort('/dev/tty.NexusS-SpeechServer', { 
 	parser: serialport.parsers.readline('\n')
 });
 

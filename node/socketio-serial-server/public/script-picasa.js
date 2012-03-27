@@ -5,9 +5,6 @@ var KEY_RIGHT = 39;
 var KEY_DOWN = 40;
 $(function () { 
 
-	var page = 1;
-	var pageSize = 18;  
-
 	//  var cursor;
 
 	$(document).ready(function() {
@@ -45,7 +42,8 @@ $(function () {
 		var opts = { position: 'center', hide: true };
 		$('#spinner').spinner(opts);
 
-		var perpage = 20 + 20; // for 1920x1080
+//		var perpage = 20 + 20; // for 1920x1080
+		var perpage = 100;
 
 		$.ajax({
 			url:"http://picasaweb.google.com/data/feed/base/all?alt=json-in-script&kind=photo&q="+query+"&filter=1&access=public&max-results="+perpage+"&imgmax=300",
@@ -181,34 +179,7 @@ $(function () {
 			if (direction == 'prev' && i > 0 && positions[i] >= here) { scroll = collection.get(i-1); break; }
 		}
 
-		if (scroll) {
-			$.scrollTo(scroll, {
-				duration: 500       
-			});
-		}
-
 		return false;
 	}
 
-	$("#next,#prev").click(function() {        
-		return scroll($(this).attr('id'));        
-	});
-
-	$(".scrolltoanchor").click(function() {
-		$.scrollTo($($(this).attr("href")), {
-			duration: 750
-		});
-		return false;
-	});
-
-
-
 });
-
-function getScrollPosition() {
-	var obj = new Object();
-	obj.x = document.documentElement.scrollLeft || document.body.scrollLeft;
-	obj.y = document.documentElement.scrollTop || document.body.scrollTop;
-	return obj;
-}
-
