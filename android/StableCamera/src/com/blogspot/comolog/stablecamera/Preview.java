@@ -1,3 +1,25 @@
+/*
+	The MIT License
+	Copyright (c) 2012 Akihiro Komori
+	
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+	
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+	
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+ */
 package com.blogspot.comolog.stablecamera;
 
 import java.io.IOException;
@@ -27,8 +49,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 		mSurfaceView = new SurfaceView(context);
 		addView(mSurfaceView);
 
-		// Install a SurfaceHolder.Callback so we get notified when the
-		// underlying surface is created and destroyed.
 		mHolder = mSurfaceView.getHolder();
 		mHolder.addCallback(this);
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -59,9 +79,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		// We purposely disregard child measurements because act as a
-		// wrapper to a SurfaceView that centers the camera preview instead
-		// of stretching it.
 		final int width = resolveSize(getSuggestedMinimumWidth(),
 				widthMeasureSpec);
 		final int height = resolveSize(getSuggestedMinimumHeight(),
@@ -89,7 +106,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 				previewHeight = mPreviewSize.height;
 			}
 
-			// Center the child SurfaceView within the parent.
 			if (width * previewHeight > height * previewWidth) {
 				final int scaledChildWidth = previewWidth * height
 						/ previewHeight;
@@ -105,8 +121,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
-		// The Surface has been created, acquire the camera and tell it where
-		// to draw.
 		try {
 			if (mCamera != null) {
 				mCamera.setPreviewDisplay(holder);
@@ -114,7 +128,7 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 		} catch (IOException exception) {
 			Log.e(TAG, "IOException caused by setPreviewDisplay()", exception);
 		}
-		
+
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
@@ -135,7 +149,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 
 		int targetHeight = h;
 
-		// Try to find an size match aspect ratio and size
 		for (Size size : sizes) {
 			double ratio = (double) size.width / size.height;
 			if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
@@ -146,7 +159,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 			}
 		}
 
-		// Cannot find the one match the aspect ratio, ignore the requirement
 		if (optimalSize == null) {
 			minDiff = Double.MAX_VALUE;
 			for (Size size : sizes) {
@@ -160,8 +172,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		// Now that the size is known, set up the camera parameters and begin
-		// the preview.
 		Camera.Parameters parameters = mCamera.getParameters();
 		parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
 		requestLayout();
