@@ -1,3 +1,25 @@
+/*
+	The MIT License
+	Copyright (c) 2012 Akihiro Komori
+	
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+	
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+	
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+ */
 package com.blogspot.comolog.stablecamera;
 
 import java.io.File;
@@ -89,17 +111,17 @@ public class StableCameraActivity extends Activity {
 
 			if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER)
 				return;
-			
 
 			if (!mIsWaitingForTaken) {
 				double rad = Math.atan2(event.values[1], event.values[0]);
 				double deg = ((rad / Math.PI) * 180) + (rad > 0 ? 0 : 360);
-				int orientation = (int)(deg + 0.5);
+				int orientation = (int) (deg + 0.5);
 				CameraInfo info = new android.hardware.Camera.CameraInfo();
 				Camera.getCameraInfo(mCameraCurrentlyLocked, info);
 				orientation = (orientation + 45) / 90 * 90;
 				int rotation = 0;
-				orientation += 270; // add offset. because of the view is landscape.
+				orientation += 270; // add offset. because of the view is
+									// landscape.
 				if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
 					rotation = (info.orientation - orientation + 360) % 360;
 				} else { // back-facing camera
@@ -107,7 +129,7 @@ public class StableCameraActivity extends Activity {
 				}
 				mCameraRotation = rotation;
 			}
-			
+
 			String str = new String();
 			for (float v : event.values) {
 				str += "" + v + ", ";
@@ -189,8 +211,8 @@ public class StableCameraActivity extends Activity {
 
 	private Uri saveBitmap(Bitmap bitmap, Date date) {
 
-//		Matrix matrix = new Matrix();
-//		matrix.postRotate(mCameraRotation);
+		// Matrix matrix = new Matrix();
+		// matrix.postRotate(mCameraRotation);
 
 		final String PATH = Environment.getExternalStorageDirectory()
 				.toString();
@@ -279,7 +301,7 @@ public class StableCameraActivity extends Activity {
 		SimpleDateFormat sFormatter = new SimpleDateFormat(
 				"yyyy:MM:dd HH:mm:ss");
 		exif.setAttribute(ExifInterface.TAG_DATETIME, sFormatter.format(date));
-		
+
 		int exifOrientation = degreesToExifOrientation(mCameraRotation);
 		exif.setAttribute(ExifInterface.TAG_ORIENTATION,
 				Integer.toString(exifOrientation));
@@ -477,7 +499,6 @@ public class StableCameraActivity extends Activity {
 			}
 		});
 
-
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -543,8 +564,7 @@ public class StableCameraActivity extends Activity {
 			mPreview.switchCamera(mCamera);
 
 			Camera.Parameters cameraParameters = mCamera.getParameters();
-			List<String> flashModes = cameraParameters
-					.getSupportedFlashModes();
+			List<String> flashModes = cameraParameters.getSupportedFlashModes();
 			mFlashModes = new ArrayList<String>();
 			for (String fm : flashModes) {
 				mFlashModes.add(new String(fm));
